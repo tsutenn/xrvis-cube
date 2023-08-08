@@ -16,6 +16,7 @@ public:
 	int getThreshG();
 
 	void setThreshG(int threshG);
+	void setCubeInfo(int cubeCount, double cubeSize, double markerMargin);
 
 	void fun();
 	void fun(int delay);
@@ -27,5 +28,9 @@ private:
 	cv::Mat adptThr;
 
 	int threshG = 120;
+
+	int cubeCount = 0;
+	int cubeSize = 0;
+	int markerMargin = 0;
 };
 

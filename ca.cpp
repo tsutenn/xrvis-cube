@@ -28,6 +28,13 @@ void ca::setThreshG(int threshG) {
 	this->threshG = threshG;
 }
 
+void ca::setCubeInfo(int cubeCount, double cubeSize, double markerMargin)
+{
+	this->cubeCount = cubeCount;
+	this->cubeSize = cubeSize;
+	this->markerMargin = markerMargin;
+}
+
 void ca::fun() {
 	cv::Mat gray;
 
