@@ -55,8 +55,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <IncludePath>D:\Users\citun\Documents\opencv\build\include;D:\Users\citun\Documents\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Users\citun\Documents\opencv\build\include;D:\Users\citun\Documents\opencv\build\include\opencv2;C:\envs\opencv\build\include;C:\envs\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;C:\envs\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>

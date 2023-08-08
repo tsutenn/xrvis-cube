@@ -1,6 +1,7 @@
 #pragma once
 #include <QThread>
 #include <qlabel.h>
+#include <qdebug.h>
 
 #include "ca.h"
 
