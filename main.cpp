@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     w.show();
 
     ca cap(CAMERA_ID);
-    CaThread ct(&cap, w.ui.label, w.ui.label_2);
+    CaThread ct(&cap, w.ui.raw_label, w.ui.bin_label);
     ct.start();
     
     int rnt = a.exec();
