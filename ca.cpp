@@ -37,20 +37,28 @@ void ca::setCubeInfo(int cubeCount, double cubeSize, double markerMargin)
 
 void ca::fun() {
 	cv::Mat gray;
+	loopBlock = true;
 
 	this->capture >> this->frame;
 	cv::cvtColor(this->frame, gray, cv::COLOR_BGRA2GRAY);
 	cv::threshold(gray, this->adptThr, (double)(this->threshG), 255, cv::THRESH_BINARY_INV);
 
-	cv::waitKey(1);
+	loopBlock = false;
+	cv::waitKey(10);
 }
 
 void ca::fun(int delay) {
 	cv::Mat gray;
+	loopBlock = true;
 
 	this->capture >> this->frame;
 	cv::cvtColor(this->frame, gray, cv::COLOR_BGRA2GRAY);
 	cv::threshold(gray, this->adptThr, (double)(this->threshG), 255, cv::THRESH_BINARY_INV);
 
+	loopBlock = false;
 	cv::waitKey(delay);
+}
+
+bool ca::LoopBlock() {
+	return loopBlock;
 }

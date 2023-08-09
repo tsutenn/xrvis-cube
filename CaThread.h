@@ -26,6 +26,16 @@ public:
         this->cameraFlag = true;
     }
 
+    void close() {
+        this->cameraFlag = false;
+        while (cap->LoopBlock());
+        delete this->cap;
+    }
+
+    bool getCameraFlag() {
+        return this->cameraFlag;
+    }
+
 protected:
     void run() override {
         while (!isInterruptionRequested()) {

@@ -5,9 +5,7 @@
 
 class ca
 {
-
 public:
-
 	ca(int camera_id);
 	~ca();
 
@@ -21,7 +19,10 @@ public:
 	void fun();
 	void fun(int delay);
 
-private:
+	bool LoopBlock();
+
+protected:
+	bool loopBlock = false;
 
 	cv::VideoCapture capture;
 	cv::Mat frame;
@@ -33,4 +34,3 @@ private:
 	int cubeSize = 0;
 	int markerMargin = 0;
 };
-

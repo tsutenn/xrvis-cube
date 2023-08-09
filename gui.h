@@ -18,5 +18,13 @@ public:
     Ui::guiClass ui;
 
     int camera_id;
+    int threshold_value;
 
+    int cube_count;
+    int marker_size;
+    int marker_margin;
+
+    bool cameraStatus = false;
+
+    void setCameraStatus(bool status);
 };

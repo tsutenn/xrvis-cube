@@ -10,10 +10,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     gui w;
-    w.show();
 
-    ca * cap;
-    CaThread * ct;
+    ca* cap;
+    CaThread* ct;
 
     ct = new CaThread(w.ui.rawlabel, w.ui.binlabel);
     ct->start();
@@ -29,16 +28,33 @@ int main(int argc, char *argv[])
     });
 
     QObject::connect(w.ui.cameraopen, &QPushButton::clicked, [&]() {
-        cap = new ca(w.ui.cameraid->value());
-        cap->setCubeInfo(w.ui.cubecount->value(), w.ui.cubesize->value(), w.ui.cubemargin->value());
+        if (w.cameraStatus) {
+            w.setCameraStatus(false);
+            ct->close();
+        }
+        else {
+            cap = new ca(w.ui.cameraid->value());
+            cap->setCubeInfo(w.ui.cubecount->value(), w.ui.cubesize->value(), w.ui.cubemargin->value());
 
-        ct->open(cap);
+            w.setCameraStatus(true);
+
+            ct->open(cap);
+        }
     });
 
+    w.show();
+    w.setFixedWidth(w.width());
     int rnt = a.exec();
 
     ct->requestInterruption();
     ct->wait();
+    if (ct->getCameraFlag()) {
+        delete ct;
+        delete cap;
+    }
+    else {
+        delete ct;
+    }
     
     return rnt;
 }
