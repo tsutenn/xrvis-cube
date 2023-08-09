@@ -12,10 +12,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     gui w;
 
-    ca* cap;
-    CaThread* ct;
+    ca * cap;
+    CaThread * ct;
+    MyLog * mlog;
+
+    mlog = new MyLog(&w);
 
     ct = new CaThread(w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
+    ct->setLog(mlog);
     ct->start();
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
@@ -72,12 +76,10 @@ int main(int argc, char *argv[])
     ct->requestInterruption();
     ct->wait();
     if (ct->getCameraFlag()) {
-        delete ct;
         delete cap;
     }
-    else {
-        delete ct;
-    }
+    delete ct;
+    delete mlog;
     
     return rnt;
 }

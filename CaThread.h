@@ -4,6 +4,7 @@
 #include <qdebug.h>
 
 #include "ca.h"
+#include "MyLog.h"
 
 class CaThread :
     public QThread
@@ -38,6 +39,10 @@ public:
         return this->cameraFlag;
     }
 
+    void setLog(MyLog* log) {
+        this->mlog = log;
+    }
+
 protected:
     void run() override {
         while (!isInterruptionRequested()) {
@@ -54,12 +59,12 @@ protected:
                 QImage imageEdge(cap->getEdges()->data, cap->getEdges()->cols, cap->getEdges()->rows, cap->getEdges()->step, QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
-                qDebug() << cap->getDetectedCount();
+                mlog->Log(QString::number(cap->getDetectedCount()));
             }
         }
     }
 
-private:
     bool cameraFlag = false;
+    MyLog * mlog;
 };
 
