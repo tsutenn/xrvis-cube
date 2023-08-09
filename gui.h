@@ -1,11 +1,8 @@
 #pragma once
 
 #include <QtWidgets/QMainWindow>
-#include "ui_gui.h"
 
-//#include "gui.h"
-//#include "ca.h"
-#include "CaThread.h"
+#include "ui_gui.h"
 
 class gui : public QMainWindow
 {
@@ -18,13 +15,20 @@ public:
     Ui::guiClass ui;
 
     int camera_id;
-    int threshold_value;
+    int threshold;
 
-    int cube_count;
     int marker_size;
-    int marker_margin;
+    double marker_length;
+    double marker_margin;
+    int cube_count;
 
     bool cameraStatus = false;
 
     void setCameraStatus(bool status);
+    void setThreshold(int value);
+
+public slots:
+    void Log(const QString& message) {
+        this->ui.LogPanel->appendPlainText(message);
+    }
 };
