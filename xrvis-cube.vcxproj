@@ -100,6 +100,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ca.h" />
+    <ClInclude Include="MyLog.h" />
     <QtMoc Include="CaThread.h" />
     <ClInclude Include="Marker.h" />
   </ItemGroup>

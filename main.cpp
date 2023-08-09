@@ -3,6 +3,7 @@
 #include "gui.h"
 #include "ca.h"
 #include "CaThread.h"
+#include "MyLog.h"
 
 #define CAMERA_ID 0
 
@@ -14,7 +15,7 @@ int main(int argc, char *argv[])
     ca* cap;
     CaThread* ct;
 
-    ct = new CaThread(w.ui.rawlabel, w.ui.binlabel);
+    ct = new CaThread(w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
     ct->start();
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
             w.setCameraStatus(true);
 
             cap = new ca(w.camera_id);
-            cap->setCubeInfo(w.cube_count, w.marker_size, w.marker_margin);
+            cap->setCubeInfo(w.marker_size, w.marker_length, w.marker_margin, w.cube_count);
             cap->setThreshG(w.threshold);
 
             w.Log("CAMERA OPENED (camera_id=" + QString::number(w.camera_id) +

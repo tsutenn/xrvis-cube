@@ -13,12 +13,14 @@ class CaThread :
 public:
     ca * cap;
     QLabel * frameLabel;
-    QLabel* adptThrLabel;
+    QLabel * adptThrLabel;
+    QLabel* edgeLabel;
 
-    CaThread(QLabel* frameLabel, QLabel* adptThrLabel, QObject* parent = nullptr) : QThread(parent) {
+    CaThread(QLabel* frameLabel, QLabel* adptThrLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
         this->cap = nullptr;
         this->frameLabel = frameLabel;
         this->adptThrLabel = adptThrLabel;
+        this->edgeLabel = edgeLabel;
     }
 
     void open(ca* cap) {
@@ -48,6 +50,11 @@ protected:
 
                 QImage imageThr(cap->getAdptThr()->data, cap->getAdptThr()->cols, cap->getAdptThr()->rows, cap->getAdptThr()->step, QImage::Format_Grayscale8);
                 adptThrLabel->setPixmap(QPixmap::fromImage(imageThr));
+
+                QImage imageEdge(cap->getEdges()->data, cap->getEdges()->cols, cap->getEdges()->rows, cap->getEdges()->step, QImage::Format_Grayscale8);
+                edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
+
+                qDebug() << cap->getDetectedCount();
             }
         }
     }

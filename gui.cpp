@@ -5,7 +5,7 @@ gui::gui(QWidget *parent)
 {
     ui.setupUi(this);
 
-    this->threshold = 120;
+    this->threshold = 128;
     this->camera_id = 0;
 
     this->marker_size = 0;
