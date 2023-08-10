@@ -59,14 +59,15 @@ void ca::fun() {
 	cv::Canny(this->adptThr, this->edges, 100, 200);
 
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(this->edges, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(this->adptThr, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	for (size_t i = 0; i < contours.size(); ++i) {
-		cv::Rect boundingRect = cv::boundingRect(contours[i]);
-		cv::Mat roi = frame(boundingRect);
+		if (contours[i].size() > 4) {
+			cnt++;
+		}
 	}
 
-	this->detected_count = contours.size();
+	this->detected_count = cnt;
 
 	gray.release();
 	loopBlock = false;
