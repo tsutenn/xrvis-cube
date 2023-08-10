@@ -1,10 +1,9 @@
 #pragma once
 #include <QThread>
 #include <qlabel.h>
-#include <qdebug.h>
 
 #include "ca.h"
-#include "MyLog.h"
+#include "GuiLog.h"
 
 class CaThread :
     public QThread
@@ -19,6 +18,8 @@ public:
 
     CaThread(QLabel* frameLabel, QLabel* adptThrLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
         this->cap = nullptr;
+        this->glog = nullptr;
+        
         this->frameLabel = frameLabel;
         this->adptThrLabel = adptThrLabel;
         this->edgeLabel = edgeLabel;
@@ -39,12 +40,13 @@ public:
         return this->cameraFlag;
     }
 
-    void setLog(MyLog* log) {
-        this->mlog = log;
+    void SetLog(GuiLog * glog) {
+        this->glog = glog;
     }
 
 protected:
     void run() override {
+        glog->Log("cv thread started");
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
                 cap->fun();
@@ -59,12 +61,12 @@ protected:
                 QImage imageEdge(cap->getEdges()->data, cap->getEdges()->cols, cap->getEdges()->rows, cap->getEdges()->step, QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
-                mlog->Log(QString::number(cap->getDetectedCount()));
+                glog->Log(QString::number(cap->getDetectedCount()));
             }
         }
     }
 
     bool cameraFlag = false;
-    MyLog * mlog;
+    GuiLog * glog;
 };
 

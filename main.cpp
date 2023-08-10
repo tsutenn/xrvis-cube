@@ -1,9 +1,11 @@
 #include <QtWidgets/QApplication>
 
-#include "gui.h"
 #include "ca.h"
+
+#include "gui.h"
+#include "GuiLog.h"
+
 #include "CaThread.h"
-#include "MyLog.h"
 
 #define CAMERA_ID 0
 
@@ -12,14 +14,14 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     gui w;
 
-    ca * cap;
-    CaThread * ct;
-    MyLog * mlog;
+    GuiLog glog;
+    QObject::connect(&glog, &GuiLog::Log, &w, &gui::Log);
 
-    mlog = new MyLog(&w);
+    ca* cap;
+    CaThread* ct;
 
     ct = new CaThread(w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
-    ct->setLog(mlog);
+    ct->SetLog(&glog);
     ct->start();
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
@@ -45,9 +47,9 @@ int main(int argc, char *argv[])
     QObject::connect(w.ui.cameraopen, &QPushButton::clicked, [&]() {
         if (w.cameraStatus) {
             w.setCameraStatus(false);
-
-            w.Log("CAMERA CLOSED");
             ct->close();
+
+            glog.Log("CAMERA CLOSED");
         }
         else {
             w.setCameraStatus(true);
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
             cap->setCubeInfo(w.marker_size, w.marker_length, w.marker_margin, w.cube_count);
             cap->setThreshG(w.threshold);
 
-            w.Log("CAMERA OPENED (camera_id=" + QString::number(w.camera_id) +
+            glog.Log("CAMERA OPENED (camera_id=" + QString::number(w.camera_id) +
                 ", marker_size=" + QString::number(w.marker_size) +
                 ", marker_length=" + QString::number(w.marker_length) +
                 ", marker_margin=" + QString::number(w.marker_margin) +
@@ -75,11 +77,9 @@ int main(int argc, char *argv[])
 
     ct->requestInterruption();
     ct->wait();
-    if (ct->getCameraFlag()) {
-        delete cap;
-    }
+
+    if (ct->getCameraFlag()) delete cap;
     delete ct;
-    delete mlog;
     
     return rnt;
 }
