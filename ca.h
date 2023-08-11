@@ -12,8 +12,8 @@ public:
 	~ca();
 
 	cv::Mat* getFrame();
-	cv::Mat* getAdptThr();
-	cv::Mat* getEdges();
+	cv::Mat* getBinaryFrame();
+	cv::Mat* getEdgeFrame();
 	int getThreshG();
 	int getDetectedCount();
 
@@ -29,8 +29,8 @@ protected:
 
 	cv::VideoCapture capture;
 	cv::Mat frame;
-	cv::Mat adptThr;
-	cv::Mat edges;
+	cv::Mat binaryFrame;
+	cv::Mat edgeFrame;
 
 	int threshG = 120;
 

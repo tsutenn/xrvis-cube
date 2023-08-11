@@ -12,16 +12,16 @@ class CaThread :
 
 public:
     ca * cap;
-    QLabel * frameLabel;
-    QLabel * adptThrLabel;
+    QLabel* frameLabel;
+    QLabel* binaryLabel;
     QLabel* edgeLabel;
 
-    CaThread(QLabel* frameLabel, QLabel* adptThrLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
+    CaThread(QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
         this->cap = nullptr;
         this->glog = nullptr;
         
         this->frameLabel = frameLabel;
-        this->adptThrLabel = adptThrLabel;
+        this->binaryLabel = binaryLabel;
         this->edgeLabel = edgeLabel;
     }
 
@@ -51,14 +51,26 @@ protected:
             if (cameraFlag) {
                 cap->fun();
 
-                QImage image(cap->getFrame()->data, cap->getFrame()->cols, cap->getFrame()->rows, cap->getFrame()->step, QImage::Format_RGB888);
+                QImage image(cap->getFrame()->data, 
+                    cap->getFrame()->cols, 
+                    cap->getFrame()->rows, 
+                    cap->getFrame()->step, 
+                    QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
                 frameLabel->setPixmap(QPixmap::fromImage(image));
 
-                QImage imageThr(cap->getAdptThr()->data, cap->getAdptThr()->cols, cap->getAdptThr()->rows, cap->getAdptThr()->step, QImage::Format_Grayscale8);
-                adptThrLabel->setPixmap(QPixmap::fromImage(imageThr));
+                QImage imageBin(cap->getBinaryFrame()->data, 
+                    cap->getBinaryFrame()->cols, 
+                    cap->getBinaryFrame()->rows, 
+                    cap->getBinaryFrame()->step, 
+                    QImage::Format_Grayscale8);
+                binaryLabel->setPixmap(QPixmap::fromImage(imageBin));
 
-                QImage imageEdge(cap->getEdges()->data, cap->getEdges()->cols, cap->getEdges()->rows, cap->getEdges()->step, QImage::Format_Grayscale8);
+                QImage imageEdge(cap->getEdgeFrame()->data, 
+                    cap->getEdgeFrame()->cols, 
+                    cap->getEdgeFrame()->rows, 
+                    cap->getEdgeFrame()->step, 
+                    QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
                 glog->Log(QString::number(cap->getDetectedCount()));
