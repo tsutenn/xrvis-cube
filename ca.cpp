@@ -76,12 +76,10 @@ void ca::fun() {
 		for (size_t i = 0; i < contours.size(); ++i)
 		{
 			
-			cv::approxPolyDP(contours[i], approxCurve, double(contours[i].size()) * 0.05, true);//input arrary�㼯    approxCurve ��ϵĵ�   ����������Ϊ����  ���ĸ���ʾΪ�պ�
-
+			cv::approxPolyDP(contours[i], approxCurve, double(contours[i].size()) * 0.05, true);
 			
 			if (approxCurve.size() != 4)
 				continue;
-
 			
 			if (!cv::isContourConvex(approxCurve))
 				continue;
@@ -101,6 +99,9 @@ void ca::fun() {
 
 			    
 			Marker m(5);
+
+			detected_count = approxCurve.size();
+
 			//for (int i = 0; i < 4; ++i)
 			//{
 			//	m.points.push_back(cv::Point2f(approxCurve[i].x, approxCurve[i].y));
@@ -114,9 +115,9 @@ void ca::fun() {
 			//{
 			//	std::swap(m.points[1], m.points[3]);
 			//}
-			//possibleMarkers.push_back(m);'
+			//possibleMarkers.push_back(m);
 
-			detectedMarkers.push_back(m);
+			// detectedMarkers.push_back(m);
 
 		}
 		
@@ -166,7 +167,7 @@ void ca::fun() {
 	}
 
 
-	this->detected_count = detectedMarkers.size();
+	// this->detected_count = detectedMarkers.size();
 
 	gray.release();
 	loopBlock = false;
