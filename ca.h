@@ -20,8 +20,9 @@ public:
 	void setThreshG(int threshG);
 	void setCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
 
-	void fun();
+	float perimeter(const std::vector<cv::Point>& a);
 
+	void fun();
 	bool LoopBlock();
 
 protected:

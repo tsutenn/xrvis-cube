@@ -47,6 +47,23 @@ void ca::setCubeInfo(int markerSize, double markerLength, double markerMargin, i
 	this->cubeCount = cubeCount;
 }
 
+float ca::perimeter(const std::vector<cv::Point>& a)
+{
+	float sum = 0, dx, dy;
+
+	for (size_t i = 0; i < a.size(); ++i)
+	{
+		size_t i2 = (i + 1) % a.size();
+
+		dx = a[i].x - a[i2].x;
+		dy = a[i].y - a[i2].y;
+
+		sum += sqrt(dx * dx + dy * dy);
+	}
+
+	return sum;
+}
+
 void ca::fun() {
 	loopBlock = true;
 
@@ -60,23 +77,57 @@ void ca::fun() {
 	cv::Canny(this->binaryFrame, this->edgeFrame, 100, 200);
 
 	std::vector<std::vector<cv::Point>> contours;
-	std::vector<Marker> detectedMarkers;
 	cv::findContours(this->binaryFrame, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	int cnt = 0;
+	std::vector<std::vector<cv::Point>> approxCurves;
+	std::vector<float> perimeters;
 
-	for (size_t i = 0; i < contours.size(); ++i) {
+	for (size_t i = 0; i < contours.size(); i++) {
 		if (contours[i].size() > 4) {
 			std::vector<cv::Point>  approxCurve;
 			cv::approxPolyDP(contours[i], approxCurve, double(contours[i].size()) * 0.05, true);
 
 			if (approxCurve.size() == 4 && cv::isContourConvex(approxCurve)) {
-				cnt++;
+				cv::Point v1 = approxCurve[1] - approxCurve[0];
+				cv::Point v2 = approxCurve[2] - approxCurve[0];
+				float o = (v1.x * v2.y) - (v1.y * v2.x);
+
+				if (o < 0.0)
+				{
+					std::swap(approxCurve[1], approxCurve[3]);
+				}
+				
+				int j = 0;
+				for (j = 0; j < approxCurves.size(); j++) {
+					float distSquared = 0;
+					for (int k = 0; k < 4; k++)
+					{
+						cv::Point v = approxCurves[j][k] - approxCurve[k];
+						distSquared += v.dot(v);
+					}
+					distSquared /= 4;
+
+					if (distSquared < 5)
+					{
+						break;
+					}
+				}
+
+				if (j < approxCurves.size()) {
+					float p0 = perimeters[j];
+					float p1 = perimeter(approxCurve);
+					approxCurves[j] = p0 < p1 ? approxCurves[j] : approxCurve;
+					perimeters[j] = p0 < p1 ? p0 : p1;
+				}
+				else {
+					approxCurves.push_back(approxCurve);
+					perimeters.push_back(perimeter(approxCurve));
+				}
 			}
 		}
 	}
 
-	this->detected_count = cnt;
+	this->detected_count = approxCurves.size();
 
 	grayFrame.release();
 	loopBlock = false;
