@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>2088</width>
-    <height>1056</height>
+    <width>1914</width>
+    <height>1063</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -455,7 +455,7 @@
                    </size>
                   </property>
                   <property name="maximum">
-                   <number>256</number>
+                   <number>255</number>
                   </property>
                   <property name="value">
                    <number>128</number>
@@ -491,7 +491,7 @@
                    </font>
                   </property>
                   <property name="maximum">
-                   <number>256</number>
+                   <number>255</number>
                   </property>
                   <property name="value">
                    <number>128</number>
@@ -806,6 +806,9 @@
                   <property name="maximum">
                    <number>65535</number>
                   </property>
+                  <property name="value">
+                   <number>1080</number>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -997,6 +1000,9 @@
                     <pointsize>11</pointsize>
                    </font>
                   </property>
+                  <property name="value">
+                   <number>8</number>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1064,6 +1070,9 @@
                     <pointsize>11</pointsize>
                    </font>
                   </property>
+                  <property name="value">
+                   <number>5</number>
+                  </property>
                  </widget>
                 </item>
                 <item>
@@ -1126,6 +1135,9 @@
                   </property>
                   <property name="singleStep">
                    <double>0.100000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>32.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -1190,6 +1202,9 @@
                   <property name="singleStep">
                    <double>0.050000000000000</double>
                   </property>
+                  <property name="value">
+                   <double>3.560000000000000</double>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -1201,6 +1216,25 @@
             <widget class="Line" name="line_3">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="outputlabel">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>output image</string>
              </property>
             </widget>
            </item>

@@ -39,22 +39,6 @@ Marker::Marker(int size, int* marker) {
 	this->size = size;
 }
 
-Marker::Marker(cv::Mat mat) {
-	cv::Size s = mat.size();
-	int size = MIN(s.height, s.width);
-
-	this->marker = new int* [size];
-	for (int i = 0; i < size; i++) {
-		this->marker[i] = new int[size];
-
-		for (int j = 0; j < size; j++) {
-			this->marker[i][j] = mat.at<uchar>(i, j);
-		}
-	}
-
-	this->size = size;
-}
-
 Marker::~Marker() {
 	this->marker = NULL;
 	delete marker;
@@ -114,11 +98,6 @@ Marker Marker::operator+=(const int& other) {
 	return out;
 }
 
-Marker Marker::ToMarker(const cv::Mat& mat) {
-	Marker marker(mat);
-	return marker;
-}
-
 void Marker::Copy(const Marker& other) {
 	this->marker = new int* [other.size];
 	for (int i = 0; i < other.size; i++) {
@@ -130,4 +109,9 @@ void Marker::Copy(const Marker& other) {
 	}
 
 	this->size = other.size;
+}
+
+int Marker::At(int x, int y)
+{
+	return marker[y][x];
 }

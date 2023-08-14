@@ -15,7 +15,6 @@ public:
 	cv::Mat* getBinaryFrame();
 	cv::Mat* getEdgeFrame();
 	int getThreshG();
-	int getDetectedCount();
 
 	void setThreshG(int threshG);
 	void setCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
@@ -25,13 +24,23 @@ public:
 	void fun();
 	bool LoopBlock();
 
+	int getMarkerSize() {
+		return markerSize;
+	}
+
+	std::vector<cv::Mat> outputImages;
+	std::vector<Marker> outputMarkers;
+
 protected:
 	bool loopBlock = false;
 
 	cv::VideoCapture capture;
 	cv::Mat frame;
+	cv::Mat grayFrame;
 	cv::Mat binaryFrame;
 	cv::Mat edgeFrame;
+
+	cv::Size canonicalSize;
 
 	int threshG = 120;
 
@@ -40,5 +49,5 @@ protected:
 	double markerLength = 0;
 	int cubeCount = 0;
 
-	int detected_count = 0;
+	std::vector<cv::Point2f> m_markerCorners2f;
 };

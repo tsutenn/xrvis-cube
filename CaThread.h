@@ -3,7 +3,7 @@
 #include <qlabel.h>
 
 #include "ca.h"
-#include "GuiLog.h"
+#include "msg.h"
 
 class CaThread :
     public QThread
@@ -11,18 +11,15 @@ class CaThread :
     Q_OBJECT
 
 public:
-    ca * cap;
-    QLabel* frameLabel;
-    QLabel* binaryLabel;
-    QLabel* edgeLabel;
-
-    CaThread(QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
+    CaThread(msg* data, QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
         this->cap = nullptr;
-        this->glog = nullptr;
+        this->mydata = data;
         
         this->frameLabel = frameLabel;
         this->binaryLabel = binaryLabel;
         this->edgeLabel = edgeLabel;
+
+        this->outputLabel = nullptr;
     }
 
     void open(ca* cap) {
@@ -40,13 +37,17 @@ public:
         return this->cameraFlag;
     }
 
-    void SetLog(GuiLog * glog) {
-        this->glog = glog;
+    void SetMsg(msg * mydata) {
+        this->mydata = mydata;
+    }
+
+    void setOutput(QLabel* outputLabel) {
+        this->outputLabel = outputLabel;
     }
 
 protected:
     void run() override {
-        glog->Log("cv thread started");
+        mydata->Log("cv thread started");
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
                 cap->fun();
@@ -73,12 +74,36 @@ protected:
                     QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
-                glog->Log(QString::number(cap->getDetectedCount()));
+                if (cap->outputImages.size() > 0) {
+                    QImage imageOut(cap->outputImages[0].data,
+                        cap->outputImages[0].cols,
+                        cap->outputImages[0].rows,
+                        cap->outputImages[0].step,
+                        QImage::Format_Grayscale8);
+                    outputLabel->setPixmap(QPixmap::fromImage(imageOut));
+
+                    QString msg = "";
+                    for (int i = 0; i < cap->getMarkerSize(); i++) {
+                        for (int j = 0; j < cap->getMarkerSize(); j++) {
+                            msg += QString::number(cap->outputMarkers[0].At(j, i));
+                            msg += ",";
+                        }
+                        msg += "\n";
+                    }
+                    msg += "\n";
+
+                    mydata->Log(msg);
+                }
             }
         }
     }
 
     bool cameraFlag = false;
-    GuiLog * glog;
-};
+    msg* mydata;
 
+    ca* cap;
+    QLabel* frameLabel;
+    QLabel* binaryLabel;
+    QLabel* edgeLabel;
+    QLabel* outputLabel;
+};

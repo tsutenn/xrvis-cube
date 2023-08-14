@@ -3,8 +3,7 @@
 #include "ca.h"
 
 #include "gui.h"
-#include "GuiLog.h"
-
+#include "msg.h"
 #include "CaThread.h"
 
 #define CAMERA_ID 0
@@ -12,17 +11,19 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    gui w;
 
-    GuiLog glog;
-    QObject::connect(&glog, &GuiLog::Log, &w, &gui::Log);
+    msg mydata;
+    gui w(&mydata);
+
+    QObject::connect(&mydata, &msg::Log, &w, &gui::Log);
 
     ca* cap;
     CaThread* ct;
 
-    ct = new CaThread(w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
-    ct->SetLog(&glog);
+    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
     ct->start();
+
+    ct->setOutput(w.ui.outputlabel);
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
         if (ct->getCameraFlag()) {
@@ -45,27 +46,38 @@ int main(int argc, char *argv[])
     });
 
     QObject::connect(w.ui.cameraopen, &QPushButton::clicked, [&]() {
-        if (w.cameraStatus) {
+        if (mydata.camera_status) {
             w.setCameraStatus(false);
             ct->close();
 
-            glog.Log("CAMERA CLOSED");
+            mydata.Log("CAMERA CLOSED");
         }
         else {
             w.setCameraStatus(true);
 
-            cap = new ca(w.camera_id);
-            cap->setCubeInfo(w.marker_size, w.marker_length, w.marker_margin, w.cube_count);
-            cap->setThreshG(w.threshold);
+            cap = new ca(mydata.camera_id);
+            cap->setCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin, mydata.cube_count);
+            cap->setThreshG(mydata.threshold);
 
-            glog.Log("CAMERA OPENED (camera_id=" + QString::number(w.camera_id) +
-                ", marker_size=" + QString::number(w.marker_size) +
-                ", marker_length=" + QString::number(w.marker_length) +
-                ", marker_margin=" + QString::number(w.marker_margin) +
-                ", cube_count=" + QString::number(w.cube_count) +
-                ", threshold=" + QString::number(w.threshold) +
+            mydata.Log("CAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
+                ", marker_size=" + QString::number(mydata.marker_size) +
+                ", marker_length=" + QString::number(mydata.marker_length) +
+                ", marker_margin=" + QString::number(mydata.marker_margin) +
+                ", cube_count=" + QString::number(mydata.cube_count) +
+                ", threshold=" + QString::number(mydata.threshold) +
                 ")");
             ct->open(cap);
+        }
+    });
+
+    QObject::connect(w.ui.ssopen, &QPushButton::clicked, [&]() {
+        if (mydata.server_status) {
+            w.setServerStatus(false);
+            mydata.Log("SERVER CLOSED");
+        }
+        else {
+            w.setServerStatus(true);
+            mydata.Log("SERVER OPENED (server_port=" + QString::number(mydata.server_port) + ")");
         }
     });
 
@@ -74,6 +86,8 @@ int main(int argc, char *argv[])
     w.setFixedSize(w.size());
 
     int rnt = a.exec();
+
+    mydata.saveConfig();
 
     ct->requestInterruption();
     ct->wait();

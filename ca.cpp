@@ -4,11 +4,20 @@ ca::ca(int camera_id) {
 	this->capture.open(camera_id);
 	this->capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
 	this->capture.set(cv::CAP_PROP_FPS, 30);
+
+	this->canonicalSize.width = 128;
+	this->canonicalSize.height = 128;
+
+	this->m_markerCorners2f.push_back(cv::Point2f(0, 0));
+	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, 0));
+	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, canonicalSize.height - 1));
+	this->m_markerCorners2f.push_back(cv::Point2f(0, canonicalSize.height - 1));
 }
 
 ca::~ca() {
 	this->capture.release();
 	this->frame.release();
+	this->grayFrame.release();
 	this->binaryFrame.release();
 	this->edgeFrame.release();
 }
@@ -28,11 +37,6 @@ cv::Mat* ca::getEdgeFrame()
 
 int ca::getThreshG() {
 	return this->threshG;
-}
-
-int ca::getDetectedCount()
-{
-	return this->detected_count;
 }
 
 void ca::setThreshG(int threshG) {
@@ -67,17 +71,32 @@ float ca::perimeter(const std::vector<cv::Point>& a)
 void ca::fun() {
 	loopBlock = true;
 
-	cv::Mat grayFrame;
+	outputImages.clear();
+	outputMarkers.clear();
+
+	/*
+	 *	generate frames
+	 */
+
+	cv::Mat _binaryFrame;
 
 	this->capture >> this->frame;
-	cv::cvtColor(this->frame, grayFrame, cv::COLOR_BGRA2GRAY);
-	cv::threshold(grayFrame, grayFrame, (double)(this->threshG), 255, cv::THRESH_BINARY_INV);
-	morphologyEx(grayFrame, grayFrame, cv::MORPH_OPEN, cv::Mat());
-	morphologyEx(grayFrame, this->binaryFrame, cv::MORPH_CLOSE, cv::Mat());
+	cv::cvtColor(this->frame, this->grayFrame, cv::COLOR_BGRA2GRAY);
+	cv::threshold(this->grayFrame, _binaryFrame, (double)(this->threshG), 255, cv::THRESH_BINARY_INV);
+	morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
+	morphologyEx(_binaryFrame, this->binaryFrame, cv::MORPH_CLOSE, cv::Mat());
 	cv::Canny(this->binaryFrame, this->edgeFrame, 100, 200);
+
+	/*
+	 *	Detected the contours of all markers
+	 */
 
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(this->binaryFrame, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+	/*
+	 *	filter out the appropriate contours
+	 */
 
 	std::vector<std::vector<cv::Point>> approxCurves;
 	std::vector<float> perimeters;
@@ -127,10 +146,71 @@ void ca::fun() {
 		}
 	}
 
-	this->detected_count = approxCurves.size();
+	/*
+	 *	Extract the markers from frame
+	 */
+	
+	std::vector<cv::Mat> canonicalMats;
 
-	grayFrame.release();
+	for (int i = 0; i < approxCurves.size(); i++) {
+		cv::Mat canonicalMat;
+
+		std::vector<cv::Point2f> approxCurve2f;
+		for (int j = 0; j < approxCurves[i].size(); j++) {
+			cv::Point2f p(approxCurves[i][j].x, approxCurves[i][j].y);
+			approxCurve2f.push_back(p);
+		}
+
+		cv::Mat M = cv::getPerspectiveTransform(approxCurve2f, this->m_markerCorners2f);
+		cv::warpPerspective(this->grayFrame, canonicalMat, M, this->canonicalSize);
+		threshold(canonicalMat, canonicalMat, 125, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+		canonicalMats.push_back(canonicalMat);
+	}
+
+	/*
+	 *	convert the image to marker
+	 */
+
+	std::vector<Marker> canonicalMarkers;
+
+	for (int i = 0; i < canonicalMats.size(); i++) {
+		int cellSize = canonicalMats[i].rows / (this->markerSize + 2);
+
+		int** m = new int* [markerSize];
+
+		for (int y = 0; y < markerSize; y++)
+		{
+			int* l = new int[markerSize];
+
+			for (int x = 0; x < markerSize; x++)
+			{
+				int cellX = (x + 1) * cellSize;
+				int cellY = (y + 1) * cellSize;
+				cv::Mat cell = canonicalMats[i](cv::Rect(cellX, cellY, cellSize, cellSize));
+
+				int nZ = cv::countNonZero(cell);
+				l[x] = (nZ > (cellSize * cellSize) / 2) ? 1 : 0;
+			}
+
+			m[y] = l;
+		}
+
+		Marker canonicalMarker(markerSize, m);
+		canonicalMarkers.push_back(canonicalMarker);
+
+		outputImages.push_back(canonicalMats[i]);
+		outputMarkers.push_back(canonicalMarker);
+	}
+
+	/*
+	 *	
+	 */
+
+	_binaryFrame.release();
+
 	loopBlock = false;
+
 	cv::waitKey(1);
 }
 

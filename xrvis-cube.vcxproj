@@ -91,6 +91,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Marker.cpp" />
+    <ClCompile Include="msg.cpp" />
     <QtRcc Include="gui.qrc" />
     <QtUic Include="gui.ui" />
     <QtMoc Include="gui.h" />
@@ -100,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ca.h" />
+    <QtMoc Include="msg.h" />
     <QtMoc Include="CaThread.h" />
     <QtMoc Include="GuiLog.h" />
     <ClInclude Include="Marker.h" />
