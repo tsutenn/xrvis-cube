@@ -62,9 +62,6 @@
     <QtMoc Include="CaThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="GuiLog.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="msg.h">
       <Filter>Header Files</Filter>
     </QtMoc>

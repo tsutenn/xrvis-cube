@@ -147,7 +147,7 @@ void ca::fun() {
 	}
 
 	/*
-	 *	Extract the markers from frame
+	 *	Extract the markers from frame and exclude the Incomplete codes
 	 */
 	
 	std::vector<cv::Mat> canonicalMats;
@@ -165,7 +165,24 @@ void ca::fun() {
 		cv::warpPerspective(this->grayFrame, canonicalMat, M, this->canonicalSize);
 		threshold(canonicalMat, canonicalMat, 125, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
-		canonicalMats.push_back(canonicalMat);
+		int cellSize = canonicalMat.rows / (this->markerSize + 2);
+		bool integrity = true;
+
+		for (int y = 0; y < markerSize + 2 && integrity; y++) {
+			int inc = (y == 0 || y == (markerSize + 1)) ? 1 : (markerSize + 1);
+			for (int x = 0; x < markerSize + 2 && integrity; x += inc) {
+				int cellX = x * cellSize;
+				int cellY = y * cellSize;
+
+				cv::Mat cell = canonicalMat(cv::Rect(cellX, cellY, cellSize, cellSize));
+				int nZ = cv::countNonZero(cell);
+
+				integrity = nZ < (cellSize * cellSize) / 2;
+			}
+		}
+
+		if(integrity)
+			canonicalMats.push_back(canonicalMat);
 	}
 
 	/*
@@ -204,8 +221,10 @@ void ca::fun() {
 	}
 
 	/*
-	 *	
+	 *	compare markers with that in dataset
 	 */
+
+
 
 	_binaryFrame.release();
 

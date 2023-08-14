@@ -103,7 +103,6 @@
     <ClInclude Include="ca.h" />
     <QtMoc Include="msg.h" />
     <QtMoc Include="CaThread.h" />
-    <QtMoc Include="GuiLog.h" />
     <ClInclude Include="Marker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
