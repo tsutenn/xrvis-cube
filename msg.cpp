@@ -1,5 +1,12 @@
 #include "msg.h"
 
+msg::msg(QObject* parent) : QObject(parent) {
+}
+
+msg::~msg()
+{
+}
+
 void msg::saveConfig()
 {
     QJsonObject json;
@@ -12,6 +19,8 @@ void msg::saveConfig()
     json["cube count"] = this->cube_count;
 
     json["server port"] = this->server_port;
+
+    json["path"] = this->path;
 
     QJsonDocument doc(json);
 
@@ -46,6 +55,8 @@ bool msg::loadConfig()
 
             this->server_port = json["server port"].toInt();
 
+            this->path = json["path"].toString();
+
             return true;
         }
     }
@@ -53,23 +64,49 @@ bool msg::loadConfig()
     return false;
 }
 
-bool msg::loadMarkerList(QString& path)
+bool msg::loadMarkerList(const QString& path)
 {
     QFile file(path);
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         int cnt = 0;
+        int cube_id = -1;
+
+        Log("start read file at " + path);
+
+        int* marker_data[6];
 
         while (!in.atEnd()) {
             QString line = in.readLine().trimmed();
-            if (cnt % 6 == 0) {
 
+            if (cnt % 7 == 0) {
+                bool ok;
+                cube_id = line.toInt(&ok);
             }
-            QStringList parts = line.split(',');
+            else {
+                marker_data[cnt % 7 - 1] = new int[marker_size * marker_size];
+                QStringList parts = line.split(',');
+
+                for (int i = 0; i < parts.size(); i++) {
+                    bool ok;
+                    marker_data[cnt % 7 - 1][i] = parts[i].toInt(&ok);
+                    int value = parts[i].toInt(&ok);
+                }
+
+                if (cnt == 6) {
+                    Cube cube(cube_id, marker_size, marker_data);
+                    cubes.push_back(cube);
+                    for (int i = 0; i < 6; i++) {
+                        delete[] marker_data[i];
+                    }
+                }
+            }
+            cnt++;
         }
 
         file.close();
+        return true;
     }
     return false;
 }

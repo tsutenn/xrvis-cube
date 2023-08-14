@@ -18,6 +18,8 @@ gui::gui(msg* data, QWidget *parent)
         ui.cubecount->setValue(mydata->cube_count);
 
         ui.ssport->setValue(mydata->server_port);
+
+        ui.pathbox->setText(mydata->path);
     }
     else {
         mydata->threshold = ui.threshold->value();
@@ -29,6 +31,8 @@ gui::gui(msg* data, QWidget *parent)
         mydata->cube_count = ui.cubecount->value();
 
         mydata->server_port = ui.ssport->value();
+
+        mydata->path = ui.pathbox->text();
     }
 
     ui.LogPanel->setStyleSheet("background: transparent;");

@@ -4,6 +4,7 @@
 #include <qjsonobject.h>
 #include <qjsondocument.h>
 #include <qfile.h>
+#include "Cube.h"
 
 class msg : public QObject
 {
@@ -23,9 +24,16 @@ public:
     bool camera_status = false;
     bool server_status = false;
 
+    std::vector<Cube> cubes;
+
+    QString path;
+
+    msg(QObject* parent = nullptr);
+    ~msg();
+
     void saveConfig();
     bool loadConfig();
-    bool loadMarkerList(QString& path);
+    bool loadMarkerList(const QString& path);
 
 signals:
     void Log(const QString& message);

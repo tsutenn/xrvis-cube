@@ -1,5 +1,7 @@
 #include "Marker.h"
 
+#include <qdebug.h>
+
 Marker::Marker(int size) {
 	this->marker = new int* [size];
 	for (int i = 0; i < size; i++) {
@@ -40,8 +42,12 @@ Marker::Marker(int size, int* marker) {
 }
 
 Marker::~Marker() {
-	this->marker = NULL;
-	delete marker;
+	// qDebug() << marker[0][0];
+	/*for (int i = 0; i < size; i++) {
+		delete[] marker[i];
+	}*/
+	// delete[] marker;
+	// marker = nullptr;
 }
 
 bool Marker::operator==(const Marker& other) {

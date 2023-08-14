@@ -216,6 +216,12 @@ void ca::fun() {
 		Marker canonicalMarker(markerSize, m);
 		canonicalMarkers.push_back(canonicalMarker);
 
+		for (int j = 0; j < markerSize; j++) {
+			delete[] m[j];
+		}
+		delete[] m;
+		m = nullptr;
+
 		outputImages.push_back(canonicalMats[i]);
 		outputMarkers.push_back(canonicalMarker);
 	}
@@ -224,12 +230,9 @@ void ca::fun() {
 	 *	compare markers with that in dataset
 	 */
 
-
-
-	_binaryFrame.release();
+	
 
 	loopBlock = false;
-
 	cv::waitKey(1);
 }
 

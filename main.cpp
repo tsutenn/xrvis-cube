@@ -16,6 +16,24 @@ int main(int argc, char *argv[])
     gui w(&mydata);
 
     QObject::connect(&mydata, &msg::Log, &w, &gui::Log);
+    QObject::connect(w.ui.cubesload, &QPushButton::clicked, [&] {
+        if (mydata.loadMarkerList(w.ui.pathbox->text())) {
+            mydata.path = w.ui.pathbox->text();
+            mydata.Log("Successfully load cube info at " + mydata.path);
+
+            //QString result("");
+            //for (int i = 0; i < mydata.marker_size; i++) {
+            //    for (int j = 0; j < mydata.marker_size; j++) {
+            //        result += QString::number(mydata.cubes[0].Face(1).At(j, i)) + ",";
+            //    }
+            //    result += "\n";
+            //}
+            //mydata.Log(result);
+        }
+        else {
+            mydata.Log("Load file failed");
+        }
+    });
 
     ca* cap;
     CaThread* ct;
