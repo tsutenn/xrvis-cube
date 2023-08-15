@@ -75,7 +75,7 @@ bool msg::loadMarkerList(const QString& path)
 
         Log("start read file at " + path);
 
-        int* marker_data[6];
+        std::vector<std::vector<int>> marker_data(6, std::vector<int>(marker_size * marker_size));
 
         while (!in.atEnd()) {
             QString line = in.readLine().trimmed();
@@ -85,7 +85,6 @@ bool msg::loadMarkerList(const QString& path)
                 cube_id = line.toInt(&ok);
             }
             else {
-                marker_data[cnt % 7 - 1] = new int[marker_size * marker_size];
                 QStringList parts = line.split(',');
 
                 for (int i = 0; i < parts.size(); i++) {
@@ -97,9 +96,6 @@ bool msg::loadMarkerList(const QString& path)
                 if (cnt == 6) {
                     Cube cube(cube_id, marker_size, marker_data);
                     cubes.push_back(cube);
-                    for (int i = 0; i < 6; i++) {
-                        delete[] marker_data[i];
-                    }
                 }
             }
             cnt++;

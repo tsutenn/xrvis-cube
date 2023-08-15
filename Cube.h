@@ -9,7 +9,7 @@ class Cube
 {
 public:
 	Cube(int id, int size);
-	Cube(int id, int size, int** markers);
+	Cube(int id, int size, std::vector<std::vector<int>> markers);
 
 	~Cube();
 
@@ -21,7 +21,7 @@ public:
 		return markers[index];
 	}
 
-	void SetData(int** markers);
+	void SetData(std::vector<std::vector<int>> markers);
 
 protected:
 	int id;

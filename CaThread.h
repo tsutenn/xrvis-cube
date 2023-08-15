@@ -94,6 +94,9 @@ protected:
 
                     mydata->Log(msg);
                 }
+                else {
+                    outputLabel->setText("OUTPUT IMAGE");
+                }
             }
         }
     }

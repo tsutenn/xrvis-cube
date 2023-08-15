@@ -1,53 +1,45 @@
 #include "Marker.h"
 
-#include <qdebug.h>
-
 Marker::Marker(int size) {
-	this->marker = new int* [size];
-	for (int i = 0; i < size; i++) {
-		this->marker[i] = new int[size];
+	std::vector<std::vector<int>> marker(size, std::vector<int>(size));
 
+	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			this->marker[i][j] = 0;
+			marker[i][j] = 0;
 		}
 	}
 
 	this->size = size;
+	this->marker = marker;
 }
 
-Marker::Marker(int size, int** marker) {
-	this->marker = new int* [size];
-	for (int i = 0; i < size; i++) {
-		this->marker[i] = new int[size];
+Marker::Marker(int size, std::vector<int> marker_data) {
+	std::vector<std::vector<int>> marker(size, std::vector<int>(size));
 
+	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			this->marker[i][j] = marker[i][j];
+			marker[i][j] = marker_data[i * size + j];
 		}
 	}
 
 	this->size = size;
+	this->marker = marker;
 }
 
-Marker::Marker(int size, int* marker) {
-	this->marker = new int* [size];
-	for (int i = 0; i < size; i++) {
-		this->marker[i] = new int[size];
+Marker::Marker(int size, std::vector<std::vector<int>> marker_data) {
+	std::vector<std::vector<int>> marker(size, std::vector<int>(size));
 
+	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			this->marker[i][j] = marker[i * size + j];
+			marker[i][j] = marker_data[i][j];
 		}
 	}
 
 	this->size = size;
+	this->marker = marker;
 }
 
 Marker::~Marker() {
-	// qDebug() << marker[0][0];
-	/*for (int i = 0; i < size; i++) {
-		delete[] marker[i];
-	}*/
-	// delete[] marker;
-	// marker = nullptr;
 }
 
 bool Marker::operator==(const Marker& other) {
@@ -67,7 +59,6 @@ bool Marker::operator==(const Marker& other) {
 }
 
 std::ostream& operator<<(std::ostream& strm, const Marker& m) {
-	// TODO: insert return statement here
 	strm << "[\n";
 	for (int i = 0; i < m.size; i++) {
 		strm << "\t[\t";
@@ -105,19 +96,44 @@ Marker Marker::operator+=(const int& other) {
 }
 
 void Marker::Copy(const Marker& other) {
-	this->marker = new int* [other.size];
-	for (int i = 0; i < other.size; i++) {
-		this->marker[i] = new int[other.size];
+	std::vector<std::vector<int>> marker(other.size, std::vector<int>(other.size));
 
+	for (int i = 0; i < other.size; i++) {
 		for (int j = 0; j < other.size; j++) {
-			this->marker[i][j] = other.marker[i][j];
+			marker[i][j] = other.marker[i][j];
 		}
 	}
 
 	this->size = other.size;
+	this->marker = marker;
 }
 
 int Marker::At(int x, int y)
 {
-	return marker[y][x];
+	return this->marker[y][x];
 }
+
+const char* Marker::toString() {
+	std::string result = "[";
+
+	for (int i = 0; i < size; i++) {
+		result += "\n\t[";
+
+		for (int j = 0; j < size; j++) {
+			result += std::to_string(marker[i][j]);
+			if (j < size - 1) {
+				result += "\t";
+			}
+		}
+
+		result += "]";
+	}
+
+	result += "\n]";
+	return result.c_str();
+}
+
+
+
+
+

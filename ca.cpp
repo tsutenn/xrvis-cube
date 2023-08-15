@@ -194,12 +194,10 @@ void ca::fun() {
 	for (int i = 0; i < canonicalMats.size(); i++) {
 		int cellSize = canonicalMats[i].rows / (this->markerSize + 2);
 
-		int** m = new int* [markerSize];
+		std::vector<std::vector<int>> m(markerSize, std::vector<int>(markerSize));
 
 		for (int y = 0; y < markerSize; y++)
 		{
-			int* l = new int[markerSize];
-
 			for (int x = 0; x < markerSize; x++)
 			{
 				int cellX = (x + 1) * cellSize;
@@ -207,20 +205,12 @@ void ca::fun() {
 				cv::Mat cell = canonicalMats[i](cv::Rect(cellX, cellY, cellSize, cellSize));
 
 				int nZ = cv::countNonZero(cell);
-				l[x] = (nZ > (cellSize * cellSize) / 2) ? 1 : 0;
+				m[y][x] = (nZ >(cellSize * cellSize) / 2) ? 1 : 0;
 			}
-
-			m[y] = l;
 		}
 
 		Marker canonicalMarker(markerSize, m);
 		canonicalMarkers.push_back(canonicalMarker);
-
-		for (int j = 0; j < markerSize; j++) {
-			delete[] m[j];
-		}
-		delete[] m;
-		m = nullptr;
 
 		outputImages.push_back(canonicalMats[i]);
 		outputMarkers.push_back(canonicalMarker);
@@ -230,7 +220,9 @@ void ca::fun() {
 	 *	compare markers with that in dataset
 	 */
 
-	
+	for (int i = 0; i < canonicalMarkers.size(); i++) {
+
+	}
 
 	loopBlock = false;
 	cv::waitKey(1);

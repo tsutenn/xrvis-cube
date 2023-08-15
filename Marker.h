@@ -3,14 +3,16 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <string>
+#include <sstream>
 
 class Marker
 {
 
 public:
 	Marker(int size);
-	Marker(int size, int** marker);
-	Marker(int size, int* marker);
+	Marker(int size, std::vector<int> marker);
+	Marker(int size, std::vector<std::vector<int>> marker);
 	~Marker();
 
 	bool operator==(const Marker& other);
@@ -21,8 +23,10 @@ public:
 
 	int At(int x, int y);
 
+	const char* toString();
+
 protected:
-	int** marker;
+	std::vector<std::vector<int>> marker;
 	int size;
 
 	friend std::ostream& operator<<(std::ostream& strm, const Marker& m);

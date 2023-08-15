@@ -21,14 +21,14 @@ int main(int argc, char *argv[])
             mydata.path = w.ui.pathbox->text();
             mydata.Log("Successfully load cube info at " + mydata.path);
 
-            //QString result("");
-            //for (int i = 0; i < mydata.marker_size; i++) {
-            //    for (int j = 0; j < mydata.marker_size; j++) {
-            //        result += QString::number(mydata.cubes[0].Face(1).At(j, i)) + ",";
-            //    }
-            //    result += "\n";
-            //}
-            //mydata.Log(result);
+            /*QString result("");
+            for (int i = 0; i < mydata.marker_size; i++) {
+                for (int j = 0; j < mydata.marker_size; j++) {
+                    result += QString::number(mydata.cubes[0].Face(0).At(j, i)) + ",";
+                }
+                result += "\n";
+            }
+            mydata.Log(result);*/
         }
         else {
             mydata.Log("Load file failed");
@@ -102,6 +102,8 @@ int main(int argc, char *argv[])
     w.move(0, 0);
     w.show();
     w.setFixedSize(w.size());
+
+    w.ui.cubesload->clicked();
 
     int rnt = a.exec();
 
