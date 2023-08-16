@@ -108,8 +108,7 @@ void Marker::Copy(const Marker& other) {
 	this->marker = marker;
 }
 
-int Marker::At(int x, int y)
-{
+int Marker::At(int x, int y) {
 	return this->marker[y][x];
 }
 

@@ -5,8 +5,7 @@ Cube::Cube(int id, int size) {
 	this->size = size;
 }
 
-Cube::Cube(int id, int size, std::vector<std::vector<int>> markers)
-{
+Cube::Cube(int id, int size, std::vector<std::vector<int>> markers) {
 	for (int i = 0; i < 6; i++) {
 		Marker marker(size, markers[i]);
 		this->markers.push_back(marker);
@@ -19,8 +18,7 @@ Cube::Cube(int id, int size, std::vector<std::vector<int>> markers)
 Cube::~Cube() {
 }
 
-void Cube::SetData(std::vector<std::vector<int>> markers)
-{
+void Cube::SetData(std::vector<std::vector<int>> markers) {
 	for (int i = 0; i < 6; i++) {
 		Marker marker(size, markers[i]);
 		this->markers.push_back(marker);
