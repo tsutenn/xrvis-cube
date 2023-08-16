@@ -24,9 +24,7 @@ public:
 	void fun();
 	bool LoopBlock();
 
-	int getMarkerSize() {
-		return markerSize;
-	}
+	int getMarkerSize();
 
 	std::vector<cv::Mat> outputImages;
 	std::vector<Marker> outputMarkers;

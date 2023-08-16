@@ -27,7 +27,5 @@ public:
     void setServerStatus(bool status);
 
 public slots:
-    void Log(const QString& message) {
-        this->ui.LogPanel->appendPlainText(message);
-    }
+    void Log(const QString& message);
 };

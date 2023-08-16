@@ -13,19 +13,15 @@ public:
 
 	~Cube();
 
-	int GetId() {
-		return id;
-	}
-
-	Marker Face(int index) {
-		return markers[index];
-	}
+	int GetId();
+	Marker Face(int index);
 
 	void SetData(std::vector<std::vector<int>> markers);
+
+	int checkFaceOnCube(Marker marker);
 
 protected:
 	int id;
 	int size;
 	std::vector<Marker> markers;
 };
-

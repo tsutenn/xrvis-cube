@@ -80,3 +80,7 @@ void gui::setServerStatus(bool status)
     mydata->server_port = ui.ssport->value();
     mydata->server_status = status;
 }
+
+void gui::Log(const QString & message) {
+    this->ui.LogPanel->appendPlainText(message);
+}

@@ -231,3 +231,7 @@ void ca::fun() {
 bool ca::LoopBlock() {
 	return loopBlock;
 }
+
+int ca::getMarkerSize() {
+	return markerSize;
+}
