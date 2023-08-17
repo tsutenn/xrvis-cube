@@ -112,7 +112,7 @@ int Marker::At(int x, int y) {
 	return this->marker[y][x];
 }
 
-const char* Marker::toString() {
+const char* Marker::ToString() {
 	std::string result = "[";
 
 	for (int i = 0; i < size; i++) {

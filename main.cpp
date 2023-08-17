@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(&mydata, &msg::Log, &w, &gui::Log);
     QObject::connect(w.ui.cubesload, &QPushButton::clicked, [&] {
-        if (mydata.loadMarkerList(w.ui.pathbox->text())) {
+        if (mydata.LoadMarkerList(w.ui.pathbox->text())) {
             mydata.path = w.ui.pathbox->text();
             mydata.Log("Successfully load cube info at " + mydata.path);
 
@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
         if (ct->getCameraFlag()) {
-            cap->setThreshG(value);
-            w.setThreshold(value);
+            cap->SetThreshG(value);
+            w.SetThreshold(value);
         }
         else {
             w.ui.threshold->setValue(value);
@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(w.ui.threshold, QOverload<int>::of(&QSpinBox::valueChanged), [&](int value) {
         if (ct->getCameraFlag()) {
-            cap->setThreshG(value);
-            w.setThreshold(value);
+            cap->SetThreshG(value);
+            w.SetThreshold(value);
         }
         else {
             w.ui.thresholdslider->setValue(value);
@@ -64,17 +64,18 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(w.ui.cameraopen, &QPushButton::clicked, [&]() {
         if (mydata.camera_status) {
-            w.setCameraStatus(false);
+            w.SetCameraStatus(false);
             ct->close();
 
             mydata.Log("CAMERA CLOSED");
         }
         else {
-            w.setCameraStatus(true);
+            w.SetCameraStatus(true);
 
             cap = new ca(mydata.camera_id);
-            cap->setCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin, mydata.cube_count);
-            cap->setThreshG(mydata.threshold);
+            cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin, mydata.cube_count);
+            cap->SetThreshG(mydata.threshold);
+            cap->SetCubeArray(mydata.cubes);
 
             mydata.Log("CAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
                 ", marker_size=" + QString::number(mydata.marker_size) +
@@ -89,11 +90,11 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(w.ui.ssopen, &QPushButton::clicked, [&]() {
         if (mydata.server_status) {
-            w.setServerStatus(false);
+            w.SetServerStatus(false);
             mydata.Log("SERVER CLOSED");
         }
         else {
-            w.setServerStatus(true);
+            w.SetServerStatus(true);
             mydata.Log("SERVER OPENED (server_port=" + QString::number(mydata.server_port) + ")");
         }
     });
@@ -106,7 +107,7 @@ int main(int argc, char *argv[]) {
 
     int rnt = a.exec();
 
-    mydata.saveConfig();
+    mydata.SaveConfig();
 
     ct->requestInterruption();
     ct->wait();

@@ -7,7 +7,7 @@ msg::~msg()
 {
 }
 
-void msg::saveConfig()
+void msg::SaveConfig()
 {
     QJsonObject json;
     json["camera id"] = this->camera_id;
@@ -32,7 +32,7 @@ void msg::saveConfig()
     }
 }
 
-bool msg::loadConfig()
+bool msg::LoadConfig()
 {
     QFile file("config.json");
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -64,7 +64,7 @@ bool msg::loadConfig()
     return false;
 }
 
-bool msg::loadMarkerList(const QString& path)
+bool msg::LoadMarkerList(const QString& path)
 {
     QFile file(path);
 
@@ -94,8 +94,8 @@ bool msg::loadMarkerList(const QString& path)
                 }
 
                 if (cnt == 6) {
-                    Cube cube(cube_id, marker_size, marker_data);
-                    cubes.push_back(cube);
+                    // Cube cube(cube_id, marker_size, marker_data);
+                    cubes.push_back(Cube(cube_id, marker_size, marker_data));
                 }
             }
             cnt++;

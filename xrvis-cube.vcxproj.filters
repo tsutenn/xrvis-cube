@@ -72,4 +72,10 @@
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="config.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="markers.txt" />
+  </ItemGroup>
 </Project>

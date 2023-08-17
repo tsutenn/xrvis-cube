@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 
+#include <opencv2/opencv.hpp>
+
 class Marker
 {
 
@@ -23,7 +25,9 @@ public:
 
 	int At(int x, int y);
 
-	const char* toString();
+	const char* ToString();
+
+	cv::Mat image;
 
 protected:
 	std::vector<std::vector<int>> marker;

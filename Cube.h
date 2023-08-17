@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include<opencv2/opencv.hpp>
 
 #include "Marker.h"
 
@@ -18,7 +19,8 @@ public:
 
 	void SetData(std::vector<std::vector<int>> markers);
 
-	int checkFaceOnCube(Marker marker);
+	int CheckFaceOnCube(Marker marker);
+	std::vector<cv::Point3f> FacePoints(float length, int face_id);
 
 protected:
 	int id;

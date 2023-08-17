@@ -50,41 +50,41 @@ protected:
         mydata->Log("cv thread started");
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
-                cap->fun();
+                cap->Fun();
 
-                QImage image(cap->getFrame()->data, 
-                    cap->getFrame()->cols, 
-                    cap->getFrame()->rows, 
-                    cap->getFrame()->step, 
+                QImage image(cap->GetFrame()->data, 
+                    cap->GetFrame()->cols,
+                    cap->GetFrame()->rows,
+                    cap->GetFrame()->step,
                     QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
                 frameLabel->setPixmap(QPixmap::fromImage(image));
 
-                QImage imageBin(cap->getBinaryFrame()->data, 
-                    cap->getBinaryFrame()->cols, 
-                    cap->getBinaryFrame()->rows, 
-                    cap->getBinaryFrame()->step, 
+                QImage imageBin(cap->GetBinaryFrame()->data, 
+                    cap->GetBinaryFrame()->cols,
+                    cap->GetBinaryFrame()->rows,
+                    cap->GetBinaryFrame()->step,
                     QImage::Format_Grayscale8);
                 binaryLabel->setPixmap(QPixmap::fromImage(imageBin));
 
-                QImage imageEdge(cap->getEdgeFrame()->data, 
-                    cap->getEdgeFrame()->cols, 
-                    cap->getEdgeFrame()->rows, 
-                    cap->getEdgeFrame()->step, 
+                QImage imageEdge(cap->GetEdgeFrame()->data, 
+                    cap->GetEdgeFrame()->cols,
+                    cap->GetEdgeFrame()->rows,
+                    cap->GetEdgeFrame()->step,
                     QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
-                if (cap->outputImages.size() > 0) {
-                    QImage imageOut(cap->outputImages[0].data,
-                        cap->outputImages[0].cols,
-                        cap->outputImages[0].rows,
-                        cap->outputImages[0].step,
+                if (cap->outputMarkers.size() > 0) {
+                    QImage imageOut(cap->outputMarkers[0].image.data,
+                        cap->outputMarkers[0].image.cols,
+                        cap->outputMarkers[0].image.rows,
+                        cap->outputMarkers[0].image.step,
                         QImage::Format_Grayscale8);
                     outputLabel->setPixmap(QPixmap::fromImage(imageOut));
 
                     QString msg = "";
-                    for (int i = 0; i < cap->getMarkerSize(); i++) {
-                        for (int j = 0; j < cap->getMarkerSize(); j++) {
+                    for (int i = 0; i < cap->GetMarkerSize(); i++) {
+                        for (int j = 0; j < cap->GetMarkerSize(); j++) {
                             msg += QString::number(cap->outputMarkers[0].At(j, i));
                             msg += ",";
                         }

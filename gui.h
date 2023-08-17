@@ -21,10 +21,9 @@ public:
 
     msg* mydata;
 
-    void setCameraStatus(bool status);
-    void setThreshold(int value);
-
-    void setServerStatus(bool status);
+    void SetCameraStatus(bool status);
+    void SetThreshold(int value);
+    void SetServerStatus(bool status);
 
 public slots:
     void Log(const QString& message);

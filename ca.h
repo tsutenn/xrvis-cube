@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "Marker.h"
+#include "Cube.h"
 
 class ca
 {
@@ -11,22 +12,23 @@ public:
 	ca(int camera_id);
 	~ca();
 
-	cv::Mat* getFrame();
-	cv::Mat* getBinaryFrame();
-	cv::Mat* getEdgeFrame();
-	int getThreshG();
+	cv::Mat* GetFrame();
+	cv::Mat* GetBinaryFrame();
+	cv::Mat* GetEdgeFrame();
+	int GetThreshG();
 
-	void setThreshG(int threshG);
-	void setCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
-
-	float perimeter(const std::vector<cv::Point>& a);
-
-	void fun();
 	bool LoopBlock();
+	int GetMarkerSize();
 
-	int getMarkerSize();
+	void SetThreshG(int threshG);
+	void SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
+	void SetCubeArray(std::vector<Cube> cubes);
 
-	std::vector<cv::Mat> outputImages;
+	float Perimeter(const std::vector<cv::Point>& a);
+
+	void Fun();
+
+	// std::vector<cv::Mat> outputImages;
 	std::vector<Marker> outputMarkers;
 
 protected:
@@ -38,14 +40,18 @@ protected:
 	cv::Mat binaryFrame;
 	cv::Mat edgeFrame;
 
-	cv::Size canonicalSize;
-
 	int threshG = 120;
 
 	int markerSize = 0;
 	double markerMargin = 0;
 	double markerLength = 0;
 	int cubeCount = 0;
+
+	cv::Size canonicalSize;
+	cv::Mat camMatrix;
+	cv::Mat distCoeff;
+
+	std::vector<Cube> cubes;
 
 	std::vector<cv::Point2f> m_markerCorners2f;
 };

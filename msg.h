@@ -31,9 +31,9 @@ public:
     msg(QObject* parent = nullptr);
     ~msg();
 
-    void saveConfig();
-    bool loadConfig();
-    bool loadMarkerList(const QString& path);
+    void SaveConfig();
+    bool LoadConfig();
+    bool LoadMarkerList(const QString& path);
 
 signals:
     void Log(const QString& message);

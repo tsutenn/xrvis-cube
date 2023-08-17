@@ -12,6 +12,9 @@ ca::ca(int camera_id) {
 	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, 0));
 	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, canonicalSize.height - 1));
 	this->m_markerCorners2f.push_back(cv::Point2f(0, canonicalSize.height - 1));
+
+	this->camMatrix = (cv::Mat_<double>(3, 3) << 922.80181267, 0, 277.82133, 0, 915.382409, 197.2520247, 0, 0, 1);
+	this->distCoeff = (cv::Mat_<double>(5, 1) << -0.4106936737, 0.1123164, -0.00748416, 0.00330122, 4.88862);
 }
 
 ca::~ca() {
@@ -22,28 +25,36 @@ ca::~ca() {
 	this->edgeFrame.release();
 }
 
-cv::Mat* ca::getFrame() {
+cv::Mat* ca::GetFrame() {
 	return &(this->frame);
 }
 
-cv::Mat* ca::getBinaryFrame() {
+cv::Mat* ca::GetBinaryFrame() {
 	return &(this->binaryFrame);
 }
 
-cv::Mat* ca::getEdgeFrame()
+cv::Mat* ca::GetEdgeFrame()
 {
 	return &(this->edgeFrame);
 }
 
-int ca::getThreshG() {
+int ca::GetThreshG() {
 	return this->threshG;
 }
 
-void ca::setThreshG(int threshG) {
+bool ca::LoopBlock() {
+	return loopBlock;
+}
+
+int ca::GetMarkerSize() {
+	return markerSize;
+}
+
+void ca::SetThreshG(int threshG) {
 	this->threshG = threshG;
 }
 
-void ca::setCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount)
+void ca::SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount)
 {
 	this->markerSize = markerSize;
 	this->markerLength = markerLength;
@@ -51,7 +62,12 @@ void ca::setCubeInfo(int markerSize, double markerLength, double markerMargin, i
 	this->cubeCount = cubeCount;
 }
 
-float ca::perimeter(const std::vector<cv::Point>& a)
+void ca::SetCubeArray(std::vector<Cube> cubes)
+{
+	this->cubes = cubes;
+}
+
+float ca::Perimeter(const std::vector<cv::Point>& a)
 {
 	float sum = 0, dx, dy;
 
@@ -68,10 +84,9 @@ float ca::perimeter(const std::vector<cv::Point>& a)
 	return sum;
 }
 
-void ca::fun() {
+void ca::Fun() {
 	loopBlock = true;
 
-	outputImages.clear();
 	outputMarkers.clear();
 
 	/*
@@ -134,13 +149,13 @@ void ca::fun() {
 
 				if (j < approxCurves.size()) {
 					float p0 = perimeters[j];
-					float p1 = perimeter(approxCurve);
+					float p1 = Perimeter(approxCurve);
 					approxCurves[j] = p0 < p1 ? approxCurves[j] : approxCurve;
 					perimeters[j] = p0 < p1 ? p0 : p1;
 				}
 				else {
 					approxCurves.push_back(approxCurve);
-					perimeters.push_back(perimeter(approxCurve));
+					perimeters.push_back(Perimeter(approxCurve));
 				}
 			}
 		}
@@ -150,15 +165,15 @@ void ca::fun() {
 	 *	Extract the markers from frame and exclude the Incomplete codes
 	 */
 	
-	std::vector<cv::Mat> canonicalMats;
+	// std::vector<cv::Mat> canonicalMats;
+	std::vector<Marker> canonicalMarkers;
 
 	for (int i = 0; i < approxCurves.size(); i++) {
 		cv::Mat canonicalMat;
 
 		std::vector<cv::Point2f> approxCurve2f;
 		for (int j = 0; j < approxCurves[i].size(); j++) {
-			cv::Point2f p(approxCurves[i][j].x, approxCurves[i][j].y);
-			approxCurve2f.push_back(p);
+			approxCurve2f.push_back(cv::Point2f(approxCurves[i][j].x, approxCurves[i][j].y));
 		}
 
 		cv::Mat M = cv::getPerspectiveTransform(approxCurve2f, this->m_markerCorners2f);
@@ -181,57 +196,48 @@ void ca::fun() {
 			}
 		}
 
-		if(integrity)
-			canonicalMats.push_back(canonicalMat);
+		if (integrity) {
+
+			/*
+			 *	convert the image to marker
+			 */
+
+			// int cellSize = canonicalMat.rows / (this->markerSize + 2);
+			std::vector<std::vector<int>> m(markerSize, std::vector<int>(markerSize));
+
+			for (int my = 0; my < markerSize; my++)
+			{
+				for (int mx = 0; mx < markerSize; mx++)
+				{
+					int cellX = (mx + 1) * cellSize;
+					int cellY = (my + 1) * cellSize;
+					cv::Mat cell = canonicalMat(cv::Rect(cellX, cellY, cellSize, cellSize));
+
+					int nZ = cv::countNonZero(cell);
+					m[my][mx] = (nZ > (cellSize * cellSize) / 2) ? 1 : 0;
+				}
+			}
+
+			Marker canonicalMarker(markerSize, m);
+			canonicalMarker.image = canonicalMat;
+
+			canonicalMarkers.push_back(canonicalMarker);
+			// outputMarkers.push_back(canonicalMarker);
+		}
 	}
 
-	/*
-	 *	convert the image to marker
-	 */
+	for (int i = 0; i < cubes.size(); i++) {
+		// std::vector<Marker> markers_on_cube;
 
-	std::vector<Marker> canonicalMarkers;
-
-	for (int i = 0; i < canonicalMats.size(); i++) {
-		int cellSize = canonicalMats[i].rows / (this->markerSize + 2);
-
-		std::vector<std::vector<int>> m(markerSize, std::vector<int>(markerSize));
-
-		for (int y = 0; y < markerSize; y++)
-		{
-			for (int x = 0; x < markerSize; x++)
-			{
-				int cellX = (x + 1) * cellSize;
-				int cellY = (y + 1) * cellSize;
-				cv::Mat cell = canonicalMats[i](cv::Rect(cellX, cellY, cellSize, cellSize));
-
-				int nZ = cv::countNonZero(cell);
-				m[y][x] = (nZ >(cellSize * cellSize) / 2) ? 1 : 0;
+		for (int j = 0; j < canonicalMarkers.size(); j++) {
+			int face_id = cubes[i].CheckFaceOnCube(canonicalMarkers[j]);
+			if (face_id > -1) {
+				// markers_on_cube.push_back(canonicalMarkers[j]);
+				outputMarkers.push_back(canonicalMarkers[j]);
 			}
 		}
-
-		Marker canonicalMarker(markerSize, m);
-		canonicalMarkers.push_back(canonicalMarker);
-
-		outputImages.push_back(canonicalMats[i]);
-		outputMarkers.push_back(canonicalMarker);
-	}
-
-	/*
-	 *	compare markers with that in dataset
-	 */
-
-	for (int i = 0; i < canonicalMarkers.size(); i++) {
-
 	}
 
 	loopBlock = false;
 	cv::waitKey(1);
-}
-
-bool ca::LoopBlock() {
-	return loopBlock;
-}
-
-int ca::getMarkerSize() {
-	return markerSize;
 }

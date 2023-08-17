@@ -7,7 +7,7 @@ gui::gui(msg* data, QWidget *parent)
 
     mydata = data;
 
-    if (mydata->loadConfig()) {
+    if (mydata->LoadConfig()) {
         ui.cameraid->setValue(mydata->camera_id);
         ui.threshold->setValue(mydata->threshold);
         ui.thresholdslider->setValue(mydata->threshold);
@@ -44,7 +44,7 @@ gui::gui(msg* data, QWidget *parent)
 gui::~gui()
 {}
 
-void gui::setCameraStatus(bool status) {
+void gui::SetCameraStatus(bool status) {
     ui.cameraid->setReadOnly(status);
     
     ui.markersize->setReadOnly(status);
@@ -66,14 +66,14 @@ void gui::setCameraStatus(bool status) {
     mydata->camera_status = status;
 }
 
-void gui::setThreshold(int value)
+void gui::SetThreshold(int value)
 {
     mydata->threshold = value;
     this->ui.thresholdslider->setValue(value);
     this->ui.threshold->setValue(value);
 }
 
-void gui::setServerStatus(bool status)
+void gui::SetServerStatus(bool status)
 {
     ui.ssport->setReadOnly(status);
     ui.ssopen->setText(status ? "CLOSE" : "OPEN");
