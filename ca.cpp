@@ -242,6 +242,17 @@ void ca::Fun() {
 		for (int j = 0; j < markers_on_cube.size(); j++) {
 			cv::Mat rvec, tvec;
 			cv::solvePnP(cubes[i].FacePoints(markerLength, marker_positions[j]), markers_on_cube[j].image, camMatrix, distCoeff, rvec, tvec);
+
+			cv::Mat rotationMatrix;
+			cv::Rodrigues(rvec, rotationMatrix);
+
+			cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
+			cv::Matx33f rotation;
+			for (int k = 0; k < 3; k++) {
+				for (int l = 0; l < 3; l++) {
+					rotation(k, l) = rotationMatrix.at<double>(k, l);
+				}
+			}
 		}
 	}
 
