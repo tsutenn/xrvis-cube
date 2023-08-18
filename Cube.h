@@ -20,7 +20,8 @@ public:
 	void SetData(std::vector<std::vector<int>> markers);
 
 	int CheckFaceOnCube(Marker marker);
-	std::vector<cv::Point3f> FacePoints(float length, int face_id);
+	int CheckFaceOnCube(Marker marker, int min_distance);
+	std::vector<cv::Point3f> FacePoints(int face_id, float length);
 
 protected:
 	int id;

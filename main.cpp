@@ -18,16 +18,7 @@ int main(int argc, char *argv[]) {
     QObject::connect(w.ui.cubesload, &QPushButton::clicked, [&] {
         if (mydata.LoadMarkerList(w.ui.pathbox->text())) {
             mydata.path = w.ui.pathbox->text();
-            mydata.Log("Successfully load cube info at " + mydata.path);
-
-            /*QString result("");
-            for (int i = 0; i < mydata.marker_size; i++) {
-                for (int j = 0; j < mydata.marker_size; j++) {
-                    result += QString::number(mydata.cubes[0].Face(0).At(j, i)) + ",";
-                }
-                result += "\n";
-            }
-            mydata.Log(result);*/
+            mydata.Log("Successfully load cube info at " + mydata.path + " (cube count: " + QString::number(mydata.cubes.size()) + ")");
         }
         else {
             mydata.Log("Load file failed");
@@ -74,8 +65,8 @@ int main(int argc, char *argv[]) {
 
             cap = new ca(mydata.camera_id);
             cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin, mydata.cube_count);
+            cap->SetCubeList(mydata.cubes);
             cap->SetThreshG(mydata.threshold);
-            cap->SetCubeArray(mydata.cubes);
 
             mydata.Log("CAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
                 ", marker_size=" + QString::number(mydata.marker_size) +

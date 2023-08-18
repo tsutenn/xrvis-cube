@@ -58,6 +58,24 @@ bool Marker::operator==(const Marker& other) {
 	return true;
 }
 
+int Marker::operator-(const Marker& other)
+{
+	if (this->size != other.size) {
+		return INT_MAX;
+	}
+
+	int result = 0;
+	for (int i = 0; i < this->size; i++) {
+		for (int j = 0; j < this->size; j++) {
+			if (this->marker[i][j] != other.marker[i][j]) {
+				result += 1;
+			}
+		}
+	}
+
+	return result;
+}
+
 std::ostream& operator<<(std::ostream& strm, const Marker& m) {
 	strm << "[\n";
 	for (int i = 0; i < m.size; i++) {

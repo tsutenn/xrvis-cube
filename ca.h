@@ -16,15 +16,12 @@ public:
 	cv::Mat* GetBinaryFrame();
 	cv::Mat* GetEdgeFrame();
 	int GetThreshG();
-
 	bool LoopBlock();
 	int GetMarkerSize();
 
 	void SetThreshG(int threshG);
 	void SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
-	void SetCubeArray(std::vector<Cube> cubes);
-
-	float Perimeter(const std::vector<cv::Point>& a);
+	void SetCubeList(std::vector<Cube> cubes);
 
 	void Fun();
 
@@ -51,7 +48,9 @@ protected:
 	cv::Mat camMatrix;
 	cv::Mat distCoeff;
 
-	std::vector<Cube> cubes;
+	std::vector<Cube> cubeList;
 
 	std::vector<cv::Point2f> m_markerCorners2f;
+
+	float Perimeter(const std::vector<cv::Point>& a);
 };

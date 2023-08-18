@@ -62,9 +62,9 @@ void ca::SetCubeInfo(int markerSize, double markerLength, double markerMargin, i
 	this->cubeCount = cubeCount;
 }
 
-void ca::SetCubeArray(std::vector<Cube> cubes)
+void ca::SetCubeList(std::vector<Cube> cubes)
 {
-	this->cubes = cubes;
+	this->cubeList = cubes;
 }
 
 float ca::Perimeter(const std::vector<cv::Point>& a)
@@ -165,7 +165,6 @@ void ca::Fun() {
 	 *	Extract the markers from frame and exclude the Incomplete codes
 	 */
 	
-	// std::vector<cv::Mat> canonicalMats;
 	std::vector<Marker> canonicalMarkers;
 
 	for (int i = 0; i < approxCurves.size(); i++) {
@@ -202,7 +201,6 @@ void ca::Fun() {
 			 *	convert the image to marker
 			 */
 
-			// int cellSize = canonicalMat.rows / (this->markerSize + 2);
 			std::vector<std::vector<int>> m(markerSize, std::vector<int>(markerSize));
 
 			for (int my = 0; my < markerSize; my++)
@@ -220,28 +218,31 @@ void ca::Fun() {
 
 			Marker canonicalMarker(markerSize, m);
 			canonicalMarker.image = canonicalMat;
+			canonicalMarker.points = approxCurve2f;
 
 			canonicalMarkers.push_back(canonicalMarker);
-			// outputMarkers.push_back(canonicalMarker);
 		}
 	}
 
-	for (int i = 0; i < cubes.size(); i++) {
+	/*
+	 *	Generate cubes;
+	 */
+
+	for (int i = 0; i < cubeList.size(); i++) {
 		std::vector<Marker> markers_on_cube;
 		std::vector<int> marker_positions;
 
 		for (int j = 0; j < canonicalMarkers.size(); j++) {
-			int face_id = cubes[i].CheckFaceOnCube(canonicalMarkers[j]);
+			int face_id = cubeList[i].CheckFaceOnCube(canonicalMarkers[j], 1);
 			if (face_id > -1) {
 				markers_on_cube.push_back(canonicalMarkers[j]);
 				marker_positions.push_back(face_id);
-				// outputMarkers.push_back(canonicalMarkers[j]);
 			}
 		}
 
 		for (int j = 0; j < markers_on_cube.size(); j++) {
 			cv::Mat rvec, tvec;
-			cv::solvePnP(cubes[i].FacePoints(markerLength, marker_positions[j]), markers_on_cube[j].image, camMatrix, distCoeff, rvec, tvec);
+			cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
 
 			cv::Mat rotationMatrix;
 			cv::Rodrigues(rvec, rotationMatrix);
@@ -253,6 +254,8 @@ void ca::Fun() {
 					rotation(k, l) = rotationMatrix.at<double>(k, l);
 				}
 			}
+
+			outputMarkers.push_back(markers_on_cube[j]);
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include <cmath>
 #include <string>
 #include <sstream>
+#include <limits.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -18,9 +19,10 @@ public:
 	~Marker();
 
 	bool operator==(const Marker& other);
+	int operator-(const Marker& other);
 	Marker operator+(const int& other);
 	Marker operator+=(const int& other);
-
+	
 	void Copy(const Marker& other);
 
 	int At(int x, int y);
@@ -28,6 +30,7 @@ public:
 	const char* ToString();
 
 	cv::Mat image;
+	std::vector<cv::Point2f> points;
 
 protected:
 	std::vector<std::vector<int>> marker;

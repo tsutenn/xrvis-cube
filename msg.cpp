@@ -93,7 +93,7 @@ bool msg::LoadMarkerList(const QString& path)
                     int value = parts[i].toInt(&ok);
                 }
 
-                if (cnt == 6) {
+                if (cnt % 7 == 6) {
                     // Cube cube(cube_id, marker_size, marker_data);
                     cubes.push_back(Cube(cube_id, marker_size, marker_data));
                 }
