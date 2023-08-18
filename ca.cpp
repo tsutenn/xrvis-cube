@@ -227,14 +227,21 @@ void ca::Fun() {
 	}
 
 	for (int i = 0; i < cubes.size(); i++) {
-		// std::vector<Marker> markers_on_cube;
+		std::vector<Marker> markers_on_cube;
+		std::vector<int> marker_positions;
 
 		for (int j = 0; j < canonicalMarkers.size(); j++) {
 			int face_id = cubes[i].CheckFaceOnCube(canonicalMarkers[j]);
 			if (face_id > -1) {
-				// markers_on_cube.push_back(canonicalMarkers[j]);
-				outputMarkers.push_back(canonicalMarkers[j]);
+				markers_on_cube.push_back(canonicalMarkers[j]);
+				marker_positions.push_back(face_id);
+				// outputMarkers.push_back(canonicalMarkers[j]);
 			}
+		}
+
+		for (int j = 0; j < markers_on_cube.size(); j++) {
+			cv::Mat rvec, tvec;
+			cv::solvePnP(cubes[i].FacePoints(markerLength, marker_positions[j]), markers_on_cube[j].image, camMatrix, distCoeff, rvec, tvec);
 		}
 	}
 
