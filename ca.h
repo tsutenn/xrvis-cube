@@ -23,9 +23,28 @@ public:
 	void SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
 	void SetCubeList(std::vector<Cube> cubes);
 
+	/*
+	 *	Generate gray_frame, binary_frame and edge_frame from input frame.
+	 */
+	void GenerateFrames(cv::Mat* input, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame);
+	void GenerateFramesFromCapture(cv::Mat* raw_frame, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame);
+
+	/*
+	 *	Extract all possible markers frome input frame.
+	 */
+	std::vector<Marker> ExtractMarkersFromFrame(cv::Mat gray_frame, cv::Mat binary_frame);
+
+	std::vector<int> ca::DetectedCubeId(std::vector<Marker> marker_list, int min_distance);
+
+	/*
+	 *	 Generate translation and rotation of cubes
+	 */
+	std::vector<Cube> GenerateCubes(std::vector<Marker> markers, int min_distance);
+
 	void Fun();
 
-	// std::vector<cv::Mat> outputImages;
+	void Wait(int ms);
+
 	std::vector<Marker> outputMarkers;
 
 protected:

@@ -66,6 +66,8 @@ bool msg::LoadConfig()
 
 bool msg::LoadMarkerList(const QString& path)
 {
+    cubes.clear();
+
     QFile file(path);
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {

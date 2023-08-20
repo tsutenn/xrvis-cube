@@ -40,6 +40,7 @@ Marker::Marker(int size, std::vector<std::vector<int>> marker_data) {
 }
 
 Marker::~Marker() {
+	image.release();
 }
 
 bool Marker::operator==(const Marker& other) {

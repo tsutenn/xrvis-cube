@@ -22,6 +22,13 @@ public:
         this->outputLabel = nullptr;
     }
 
+    ~CaThread() {
+        raw.release();
+        grayFrame.release();
+        binaryFrame.release();
+        edgeFrame.release();
+    }
+
     void open(ca* cap) {
         this->cap = cap;
         this->cameraFlag = true;
@@ -29,8 +36,14 @@ public:
 
     void close() {
         this->cameraFlag = false;
-        while (cap->LoopBlock());
+        while (cap->LoopBlock() || loopBlock);
         delete this->cap;
+
+        outputLabel->setText("OUTPUT IMAGE");
+        frameLabel->setText(" ");
+        binaryLabel->setText(" ");
+        edgeLabel->setText(" ");
+
     }
 
     bool getCameraFlag() {
@@ -46,6 +59,7 @@ public:
     }
 
 protected:
+    /*
     void run() override {
         mydata->Log("cv thread started");
         while (!isInterruptionRequested()) {
@@ -100,8 +114,53 @@ protected:
             }
         }
     }
+    */
+    // /*
+    void run() override {
+        mydata->Log("cv thread started");
+        while (!isInterruptionRequested()) {
+            if (cameraFlag) {
+                loopBlock = true;
 
+                cap->GenerateFramesFromCapture(&raw, &grayFrame, &binaryFrame, &edgeFrame);
+                auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
+                // auto detected_cube_ids = cap->DetectedCubeId(detected_markers, 1);
+                auto detected_cubes = cap->GenerateCubes(detected_markers, 1);
+
+                QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
+                image = image.rgbSwapped(); // BGR to RGB
+                frameLabel->setPixmap(QPixmap::fromImage(image));
+
+                QImage imageBin(binaryFrame.data, binaryFrame.cols, binaryFrame.rows, binaryFrame.step, QImage::Format_Grayscale8);
+                binaryLabel->setPixmap(QPixmap::fromImage(imageBin));
+
+                QImage imageEdge(edgeFrame.data, edgeFrame.cols, edgeFrame.rows, edgeFrame.step, QImage::Format_Grayscale8);
+                edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
+
+                if (detected_markers.size() > 0) {
+                    QImage imageOut(detected_markers[0].image.data, detected_markers[0].image.cols, detected_markers[0].image.rows, detected_markers[0].image.step, QImage::Format_Grayscale8);
+                    this->outputLabel->setPixmap(QPixmap::fromImage(imageOut));
+                }
+                else {
+                    outputLabel->setText("OUTPUT IMAGE");
+                }
+
+                if (detected_cubes.size() > 0) {
+                    QString result = "detected cube:";
+                    for (int i = 0; i < detected_cubes.size(); i++) {
+                        result += " " + QString::number(detected_cubes[i].GetId()) + ",";
+                    }
+                    mydata->Log(result);
+                }
+
+                loopBlock = false;
+                cap->Wait(40);
+            }
+        }
+    }
+    // */
     bool cameraFlag = false;
+    bool loopBlock = false;
     msg* mydata;
 
     ca* cap;
@@ -109,4 +168,9 @@ protected:
     QLabel* binaryLabel;
     QLabel* edgeLabel;
     QLabel* outputLabel;
+
+    cv::Mat raw;
+    cv::Mat grayFrame;
+    cv::Mat binaryFrame;
+    cv::Mat edgeFrame;
 };

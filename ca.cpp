@@ -84,30 +84,36 @@ float ca::Perimeter(const std::vector<cv::Point>& a)
 	return sum;
 }
 
-void ca::Fun() {
-	loopBlock = true;
+void ca::GenerateFrames(cv::Mat* input, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame) {
+	//cv::Mat _binaryFrame;
 
-	outputMarkers.clear();
+	cv::cvtColor(*input, *gray_frame, cv::COLOR_BGRA2GRAY);
+	//cv::threshold(*gray_frame, _binaryFrame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
+	//morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
+	//morphologyEx(_binaryFrame, *binary_frame, cv::MORPH_CLOSE, cv::Mat());
+	cv::threshold(*gray_frame, *binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
+	cv::Canny(*binary_frame, *edge_frame, 100, 200);
 
-	/*
-	 *	generate frames
-	 */
+	//_binaryFrame.release();
+}
 
+void ca::GenerateFramesFromCapture(cv::Mat* raw_frame, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame)
+{
 	cv::Mat _binaryFrame;
+	capture >> *raw_frame;
 
-	this->capture >> this->frame;
-	cv::cvtColor(this->frame, this->grayFrame, cv::COLOR_BGRA2GRAY);
-	cv::threshold(this->grayFrame, _binaryFrame, (double)(this->threshG), 255, cv::THRESH_BINARY_INV);
-	morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
-	morphologyEx(_binaryFrame, this->binaryFrame, cv::MORPH_CLOSE, cv::Mat());
-	cv::Canny(this->binaryFrame, this->edgeFrame, 100, 200);
+	GenerateFrames(raw_frame, gray_frame, binary_frame, edge_frame);
+}
+
+std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat gray_frame, cv::Mat binary_frame) {
+	std::vector<Marker> canonicalMarkers;
 
 	/*
 	 *	Detected the contours of all markers
 	 */
 
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(this->binaryFrame, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(binary_frame, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
 	/*
 	 *	filter out the appropriate contours
@@ -130,7 +136,7 @@ void ca::Fun() {
 				{
 					std::swap(approxCurve[1], approxCurve[3]);
 				}
-				
+
 				int j = 0;
 				for (j = 0; j < approxCurves.size(); j++) {
 					float distSquared = 0;
@@ -164,8 +170,6 @@ void ca::Fun() {
 	/*
 	 *	Extract the markers from frame and exclude the Incomplete codes
 	 */
-	
-	std::vector<Marker> canonicalMarkers;
 
 	for (int i = 0; i < approxCurves.size(); i++) {
 		cv::Mat canonicalMat;
@@ -175,11 +179,11 @@ void ca::Fun() {
 			approxCurve2f.push_back(cv::Point2f(approxCurves[i][j].x, approxCurves[i][j].y));
 		}
 
-		cv::Mat M = cv::getPerspectiveTransform(approxCurve2f, this->m_markerCorners2f);
-		cv::warpPerspective(this->grayFrame, canonicalMat, M, this->canonicalSize);
+		cv::Mat M = cv::getPerspectiveTransform(approxCurve2f, m_markerCorners2f);
+		cv::warpPerspective(gray_frame, canonicalMat, M, canonicalSize);
 		threshold(canonicalMat, canonicalMat, 125, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
 
-		int cellSize = canonicalMat.rows / (this->markerSize + 2);
+		int cellSize = canonicalMat.rows / (markerSize + 2);
 		bool integrity = true;
 
 		for (int y = 0; y < markerSize + 2 && integrity; y++) {
@@ -223,42 +227,110 @@ void ca::Fun() {
 			canonicalMarkers.push_back(canonicalMarker);
 		}
 	}
+	return canonicalMarkers;
+}
 
-	/*
-	 *	Generate cubes;
-	 */
+std::vector<int> ca::DetectedCubeId(std::vector<Marker> marker_list, int min_distance) {
+	std::vector<int> detected_cubes;
 
 	for (int i = 0; i < cubeList.size(); i++) {
 		std::vector<Marker> markers_on_cube;
 		std::vector<int> marker_positions;
 
-		for (int j = 0; j < canonicalMarkers.size(); j++) {
-			int face_id = cubeList[i].CheckFaceOnCube(canonicalMarkers[j], 1);
+		for (int j = 0; j < marker_list.size(); j++) {
+			int face_id = cubeList[i].CheckFaceOnCube(marker_list[j], min_distance);
 			if (face_id > -1) {
-				markers_on_cube.push_back(canonicalMarkers[j]);
+				markers_on_cube.push_back(marker_list[j]);
 				marker_positions.push_back(face_id);
 			}
 		}
 
-		for (int j = 0; j < markers_on_cube.size(); j++) {
-			cv::Mat rvec, tvec;
-			cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
+		if (markers_on_cube.size() > 0) {
+			for (int j = 0; j < markers_on_cube.size(); j++) {
+				cv::Mat rvec, tvec;
+				cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
 
-			cv::Mat rotationMatrix;
-			cv::Rodrigues(rvec, rotationMatrix);
+				cv::Mat rotationMatrix;
+				cv::Rodrigues(rvec, rotationMatrix);
 
-			cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-			cv::Matx33f rotation;
-			for (int k = 0; k < 3; k++) {
-				for (int l = 0; l < 3; l++) {
-					rotation(k, l) = rotationMatrix.at<double>(k, l);
+				cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
+				cv::Matx33f rotation;
+				for (int k = 0; k < 3; k++) {
+					for (int l = 0; l < 3; l++) {
+						rotation(k, l) = rotationMatrix.at<double>(k, l);
+					}
 				}
+
+				cubeList[i].translation = translation;
+				cubeList[i].rotation = rotation;
 			}
 
-			outputMarkers.push_back(markers_on_cube[j]);
+			detected_cubes.push_back(i);
 		}
 	}
 
+	return detected_cubes;
+}
+
+std::vector<Cube> ca::GenerateCubes(std::vector<Marker> marker_list, int min_distance) {
+	std::vector<Cube> detected_cubes;
+
+	for (int i = 0; i < cubeList.size(); i++) {
+		std::vector<Marker> markers_on_cube;
+		std::vector<int> marker_positions;
+
+		for (int j = 0; j < marker_list.size(); j++) {
+			int face_id = cubeList[i].CheckFaceOnCube(marker_list[j], min_distance);
+			if (face_id > -1) {
+				markers_on_cube.push_back(marker_list[j]);
+				marker_positions.push_back(face_id);
+			}
+		}
+
+		if (markers_on_cube.size() > 0) {
+			for (int j = 0; j < markers_on_cube.size(); j++) {
+				cv::Mat rvec, tvec;
+				cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
+
+				cv::Mat rotationMatrix;
+				cv::Rodrigues(rvec, rotationMatrix);
+
+				cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
+				cv::Matx33f rotation;
+				for (int k = 0; k < 3; k++) {
+					for (int l = 0; l < 3; l++) {
+						rotation(k, l) = rotationMatrix.at<double>(k, l);
+					}
+				}
+
+				cubeList[i].translation = translation;
+				cubeList[i].rotation = rotation;
+			}
+		
+			detected_cubes.push_back(cubeList[i]);
+		}
+	}
+
+	return detected_cubes;
+}
+
+void ca::Fun() {
+	loopBlock = true;
+	outputMarkers.clear();
+
+	capture >> frame;
+	GenerateFrames(&frame, &grayFrame, &binaryFrame, &edgeFrame);
+	auto canonicalMarkers = ExtractMarkersFromFrame(grayFrame, binaryFrame);
+	auto detectedCubes = GenerateCubes(canonicalMarkers, 1);
+
+	for (int i = 0; i < canonicalMarkers.size(); i++) {
+		outputMarkers.push_back(canonicalMarkers[i]);
+	}
+
 	loopBlock = false;
-	cv::waitKey(1);
+	cv::waitKey(10);
+}
+
+void ca::Wait(int ms) {
+	cv::waitKey(ms);
 }

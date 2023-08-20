@@ -33,15 +33,6 @@ void Cube::SetData(std::vector<std::vector<int>> markers) {
 	}
 }
 
-/*
- * return the marker id on the face.
- * 0:	location: y = +1	direction: +x
- * 1:	location: y = -1	direction: -x
- * 2:	location: x = -1	direction: +y
- * 3:	location: x = +1	direction: -y
- * 4:	location: z = -1	direction: +y
- * 5:	location: z = +1	direction: -y
- */
 int Cube::CheckFaceOnCube(Marker marker) {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 4; j++) {
@@ -52,16 +43,6 @@ int Cube::CheckFaceOnCube(Marker marker) {
 	return -1;
 }
 
-/*
- * return the marker id on the face.
- * 0:	location: y = +1	direction: +x
- * 1:	location: y = -1	direction: -x
- * 2:	location: x = -1	direction: +y
- * 3:	location: x = +1	direction: -y
- * 4:	location: z = -1	direction: +y
- * 5:	location: z = +1	direction: -y
- * min_distance: The max count of different value.
- */
 int Cube::CheckFaceOnCube(Marker marker, int distance) {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 4; j++) {
@@ -72,15 +53,6 @@ int Cube::CheckFaceOnCube(Marker marker, int distance) {
 	return -1;
 }
 
-/*
- * return the points array of the face.
- * 0:	location: y = +1	direction: +x
- * 1:	location: y = -1	direction: -x
- * 2:	location: x = -1	direction: +y
- * 3:	location: x = +1	direction: -y
- * 4:	location: z = -1	direction: +y
- * 5:	location: z = +1	direction: -y
- */
 std::vector<cv::Point3f> Cube::FacePoints(int face_id, float length) {
 	std::vector<cv::Point3f> result;
 	float l = length / 2;
