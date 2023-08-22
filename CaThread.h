@@ -1,5 +1,5 @@
 #pragma once
-#include <QThread>
+#include <qthread.h>
 #include <qlabel.h>
 
 #include "ca.h"
