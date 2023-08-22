@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
         if (mydata.camera_status) {
             w.SetCameraStatus(false);
             ct->close();
+            mydata.cube_list.clear();
 
             mydata.Log("CAMERA CLOSED");
         }
