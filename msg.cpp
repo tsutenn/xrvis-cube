@@ -117,6 +117,7 @@ bool msg::LoadMarkerList(const QString& path)
 
 bool msg::SetBaseCube(std::vector<Cube>& cube_list, Cube& base_cube) {
     bool contain = false;
+    cube_list.clear();
 
     for (int i = 0; i < cubes.size(); i++) {
         if (cubes[i].GetId() == base_cube_id) {

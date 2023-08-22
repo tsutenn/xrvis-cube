@@ -88,7 +88,7 @@ public:
 	cv::Matx33f GetRotationMatrix();
 
 	cv::Vec3f GetTranslation();
-	cv::Vec3f GetRotation();
+	cv::Vec4f GetRotation();
 
 	const char* GetTransformInString();
 	const char* GetRotationInString();
@@ -110,5 +110,5 @@ protected:
 	cv::Matx33f rotationMatrix;
 
 	cv::Vec3f translation;
-	cv::Vec3f rotation;
+	cv::Vec4f rotation;
 };

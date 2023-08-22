@@ -29,10 +29,15 @@ public:
     bool camera_status = false;
     bool server_status = false;
 
+    bool camera_loop = false;
+    bool server_loop = false;
+    bool write_loop = false;
+
     std::vector<Cube> cubes;
 
     Cube base_cube;
     std::vector<Cube> cube_list;
+    std::vector<Cube> detected_cubes;
 
     QString path;
 

@@ -1,10 +1,12 @@
 #include <QtWidgets/QApplication>
 
 #include "ca.h"
+#include "ss.h"
 
 #include "gui.h"
 #include "msg.h"
 #include "CaThread.h"
+#include "SsThread.h"
 
 #define CAMERA_ID 0
 
@@ -27,12 +29,16 @@ int main(int argc, char *argv[]) {
     });
 
     ca* cap;
+    ss* ser;
     CaThread* ct;
+    SsThread* st;
 
     ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
     ct->start();
-
     ct->setOutput(w.ui.outputlabel);
+
+    st = new SsThread(&mydata);
+    st->start();
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
         if (ct->getCameraFlag()) {
@@ -88,11 +94,16 @@ int main(int argc, char *argv[]) {
     QObject::connect(w.ui.ssopen, &QPushButton::clicked, [&]() {
         if (mydata.server_status) {
             w.SetServerStatus(false);
+            st->close();
             mydata.Log("SERVER CLOSED");
         }
         else {
             w.SetServerStatus(true);
+            ser = new ss(mydata.server_port);
             mydata.Log("SERVER OPENED (server_port=" + QString::number(mydata.server_port) + ")");
+            st->open(ser);
+            mydata.Log(st->ipv4Address());
+            w.ui.ssip->setText(st->ipv4Address());
         }
     });
 
@@ -107,10 +118,14 @@ int main(int argc, char *argv[]) {
     mydata.SaveConfig();
 
     ct->requestInterruption();
+    st->requestInterruption();
+    if (st->getServerFlag()) st->close();
     ct->wait();
+    st->wait();
 
     if (ct->getCameraFlag()) delete cap;
     delete ct;
-    
+    delete st;
+
     return rnt;
 }

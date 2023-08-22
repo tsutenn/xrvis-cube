@@ -5,6 +5,6 @@
     "marker margin": 3.56,
     "marker size": 5,
     "path": "markers.txt",
-    "server port": 1240,
-    "threshold": 117
+    "server port": 1228,
+    "threshold": 100
 }

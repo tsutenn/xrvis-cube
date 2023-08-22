@@ -36,7 +36,7 @@ public:
 
     void close() {
         this->cameraFlag = false;
-        while (cap->LoopBlock() || loopBlock);
+        while (mydata->camera_loop);
         delete this->cap;
 
         outputLabel->setText("OUTPUT IMAGE");
@@ -44,6 +44,7 @@ public:
         binaryLabel->setText(" ");
         edgeLabel->setText(" ");
 
+        mydata->detected_cubes.clear();
     }
 
     bool getCameraFlag() {
@@ -63,13 +64,14 @@ protected:
         mydata->Log("cv thread started");
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
-                loopBlock = true;
+                mydata->camera_loop = true;
+                while (mydata->write_loop);
 
                 cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
                 auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
                 
                 cap->GenerateBaseCube(mydata->base_cube, detected_markers, 1);
-                auto detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, 1);
+                mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, 1);
 
                 QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
@@ -89,17 +91,17 @@ protected:
                     outputLabel->setText("OUTPUT IMAGE");
                 }
 
-                if (detected_cubes.size() > 0) {
-                    QString result = "detected cubes: (" + QString::number(detected_cubes.size()) + ")\n";
-                    for (int i = 0; i < detected_cubes.size(); i++) {
-                        result += "#" + QString::number(detected_cubes[i].GetId()) + "\n";
-                        result += QString::fromUtf8(detected_cubes[i].GetTransformInString()) + "\n";
-                        result += QString::fromUtf8(detected_cubes[i].GetRotationInString()) + "\n";
+                if (mydata->detected_cubes.size() > 0) {
+                    QString result = "detected cubes: (" + QString::number(mydata->detected_cubes.size()) + ")\n";
+                    for (int i = 0; i < mydata->detected_cubes.size(); i++) {
+                        result += "#" + QString::number(mydata->detected_cubes[i].GetId()) + "\n";
+                        result += QString::fromUtf8(mydata->detected_cubes[i].GetTransformInString()) + "\n";
+                        result += QString::fromUtf8(mydata->detected_cubes[i].GetRotationInString()) + "\n";
                     }
                     mydata->Log(result);
                 }
 
-                loopBlock = false;
+                mydata->camera_loop = false;
                 cap->Wait(34);
             }
         }

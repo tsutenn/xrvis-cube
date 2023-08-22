@@ -79,7 +79,7 @@ int Cube::CheckFaceOnCube(Marker& marker, int min_distance, int& rotation)
 std::vector<cv::Point3f> Cube::FacePoints(int face_id, float length, float margin) {
 	std::vector<cv::Point3f> result;
 	float l = length / 2;
-	float h = l + margin;
+	float h = l;
 
 	switch (face_id) {
 	case 0:
@@ -176,7 +176,7 @@ cv::Vec3f Cube::GetTranslation()
 	return translation;
 }
 
-cv::Vec3f Cube::GetRotation()
+cv::Vec4f Cube::GetRotation()
 {
 	return rotation;
 }
@@ -198,7 +198,8 @@ const char* Cube::GetRotationInString()
 	std::string rotationStr = "Rotation: [" +
 		std::to_string(rotation[0]) + ", " +
 		std::to_string(rotation[1]) + ", " +
-		std::to_string(rotation[2]) + "]";
+		std::to_string(rotation[2]) + ", " +
+		std::to_string(rotation[3]) + "]";
 
 	char* result = new char[rotationStr.size() + 1];
 	std::strcpy(result, rotationStr.c_str());
