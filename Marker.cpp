@@ -100,7 +100,6 @@ Marker Marker::operator+(const int& other) {
 
 	for (int i = 0; i < this->size; i++) {
 		for (int j = 0; j < this->size; j++) {
-			// out.marker[i][j] = this->marker[size - j - 1][i];
 			out.marker[i][j] = this->marker[j][size - i - 1];
 		}
 	}

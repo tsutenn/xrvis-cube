@@ -94,6 +94,7 @@
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="Marker.cpp" />
     <ClCompile Include="msg.cpp" />
+    <ClCompile Include="ss.cpp" />
     <QtRcc Include="gui.qrc" />
     <QtUic Include="gui.ui" />
     <QtMoc Include="gui.h" />
@@ -103,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ca.h" />
+    <ClInclude Include="ss.h" />
     <QtMoc Include="msg.h" />
     <QtMoc Include="CaThread.h" />
     <ClInclude Include="Cube.h" />

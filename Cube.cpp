@@ -158,7 +158,7 @@ void Cube::SetRotationMatrix(cv::Matx33f& rotationMatrix)
 
 void Cube::GenerateTranslation(Cube base_cube)
 {
-	this->translation = base_cube.GetRotationMatrix() * (this->translationVector - base_cube.GetTranslationVector());
+	this->translation = base_cube.GetRotationMatrix().t() * (this->translationVector - base_cube.GetTranslationVector());
 }
 
 cv::Vec3f Cube::GetTranslationVector()

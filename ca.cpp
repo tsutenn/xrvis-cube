@@ -277,15 +277,15 @@ void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int
 			_rotationMatrix_sum += _rotationMatrix;
 		}
 
+		cv::Matx33f rotationMatrix;
+		cv::Vec3f translationVector;
+
 		for (int j = 0; j < 3; j++) {
 			for (int k = 0; k < 3; k++) {
-				_rotationMatrix_sum(j, k) /= markers_on_cube.size();
+				rotationMatrix(j, k) = _rotationMatrix_sum(j, k) / markers_on_cube.size();
 			}
-			_translationVector_sum[j] /= markers_on_cube.size();
+			translationVector[j] = _translationVector_sum[j] / markers_on_cube.size();
 		}
-
-		cv::Matx33f rotationMatrix = _rotationMatrix_sum.t();
-		cv::Vec3f translationVector = _translationVector_sum;
 
 		base_cube.SetRotationMatrix(rotationMatrix);
 		base_cube.SetTranslationVector(translationVector);
@@ -334,15 +334,15 @@ std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cub
 				_rotationMatrix_sum += _rotationMatrix;
 			}
 		
+			cv::Matx33f rotationMatrix;
+			cv::Vec3f translationVector;
+
 			for (int j = 0; j < 3; j++) {
 				for (int k = 0; k < 3; k++) {
-					_rotationMatrix_sum(j, k) /= markers_on_cube.size();
+					rotationMatrix(j, k) = _rotationMatrix_sum(j, k) / markers_on_cube.size();
 				}
-				_translationVector_sum[j] /= markers_on_cube.size();
+				translationVector[j] = _translationVector_sum[j] / markers_on_cube.size();
 			}
-
-			cv::Matx33f rotationMatrix = _rotationMatrix_sum.t();
-			cv::Vec3f translationVector = _translationVector_sum;
 
 			cube_list[i].SetRotationMatrix(rotationMatrix);
 			cube_list[i].SetTranslationVector(translationVector);
