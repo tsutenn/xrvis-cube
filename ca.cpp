@@ -50,21 +50,29 @@ int ca::GetMarkerSize() {
 	return markerSize;
 }
 
+Cube& ca::GetBaseCube() {
+	return baseCube;
+}
+
+std::vector<Cube>& ca::GetCubeList() {
+	return cubeList;
+}
+
 void ca::SetThreshG(int threshG) {
 	this->threshG = threshG;
 }
 
-void ca::SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount)
+void ca::SetCubeInfo(int markerSize, double markerLength, double markerMargin)
 {
 	this->markerSize = markerSize;
 	this->markerLength = markerLength;
 	this->markerMargin = markerMargin;
-	this->cubeCount = cubeCount;
 }
 
-void ca::SetCubeList(std::vector<Cube> cubes)
+void ca::SetCubeList(std::vector<Cube> cube_list, Cube base_cube)
 {
-	this->cubeList = cubes;
+	this->cubeList = cube_list;
+	this->baseCube = base_cube;
 }
 
 float ca::Perimeter(const std::vector<cv::Point>& a)
@@ -84,28 +92,28 @@ float ca::Perimeter(const std::vector<cv::Point>& a)
 	return sum;
 }
 
-void ca::GenerateFrames(cv::Mat* input, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame) {
+void ca::GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame) {
 	//cv::Mat _binaryFrame;
 
-	cv::cvtColor(*input, *gray_frame, cv::COLOR_BGRA2GRAY);
+	cv::cvtColor(input, gray_frame, cv::COLOR_BGRA2GRAY);
 	//cv::threshold(*gray_frame, _binaryFrame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
 	//morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
 	//morphologyEx(_binaryFrame, *binary_frame, cv::MORPH_CLOSE, cv::Mat());
-	cv::threshold(*gray_frame, *binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
-	cv::Canny(*binary_frame, *edge_frame, 100, 200);
+	cv::threshold(gray_frame, binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
+	cv::Canny(binary_frame, edge_frame, 100, 200);
 
 	//_binaryFrame.release();
 }
 
-void ca::GenerateFramesFromCapture(cv::Mat* raw_frame, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame)
+void ca::GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame)
 {
 	cv::Mat _binaryFrame;
-	capture >> *raw_frame;
+	capture >> raw_frame;
 
 	GenerateFrames(raw_frame, gray_frame, binary_frame, edge_frame);
 }
 
-std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat gray_frame, cv::Mat binary_frame) {
+std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat& gray_frame, cv::Mat& binary_frame) {
 	std::vector<Marker> canonicalMarkers;
 
 	/*
@@ -230,84 +238,118 @@ std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat gray_frame, cv::Mat bina
 	return canonicalMarkers;
 }
 
-std::vector<int> ca::DetectedCubeId(std::vector<Marker> marker_list, int min_distance) {
-	std::vector<int> detected_cubes;
+void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance){
+	std::vector<Marker> markers_on_cube;
+	std::vector<int> marker_positions;
+	std::vector<int> marker_rotations;
 
-	for (int i = 0; i < cubeList.size(); i++) {
-		std::vector<Marker> markers_on_cube;
-		std::vector<int> marker_positions;
-
-		for (int j = 0; j < marker_list.size(); j++) {
-			int face_id = cubeList[i].CheckFaceOnCube(marker_list[j], min_distance);
-			if (face_id > -1) {
-				markers_on_cube.push_back(marker_list[j]);
-				marker_positions.push_back(face_id);
-			}
-		}
-
-		if (markers_on_cube.size() > 0) {
-			for (int j = 0; j < markers_on_cube.size(); j++) {
-				cv::Mat rvec, tvec;
-				cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
-
-				cv::Mat rotationMatrix;
-				cv::Rodrigues(rvec, rotationMatrix);
-
-				cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-				cv::Matx33f rotation;
-				for (int k = 0; k < 3; k++) {
-					for (int l = 0; l < 3; l++) {
-						rotation(k, l) = rotationMatrix.at<double>(k, l);
-					}
-				}
-
-				cubeList[i].translation = translation;
-				cubeList[i].rotation = rotation;
-			}
-
-			detected_cubes.push_back(i);
+	for (int j = 0; j < marker_list.size(); j++) {
+		int marker_rotation = 0;
+		int face_id = base_cube.CheckFaceOnCube(marker_list[j], min_distance, marker_rotation);
+		if (face_id >= 0) {
+			markers_on_cube.push_back(marker_list[j]);
+			marker_positions.push_back(face_id);
+			marker_rotations.push_back(marker_rotation);
 		}
 	}
 
-	return detected_cubes;
+	if (markers_on_cube.size() > 0) {
+		cv::Vec3f _translationVector_sum(0, 0, 0);
+		cv::Matx33f _rotationMatrix_sum(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+		for (int j = 0; j < markers_on_cube.size(); j++) {
+			cv::Mat rvec, tvec;
+			cv::solvePnP(base_cube.FacePoints(marker_positions[j], marker_rotations[j], markerLength, markerMargin),
+				markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
+
+			cv::Mat _rotationMatrix_mat;
+			cv::Rodrigues(rvec, _rotationMatrix_mat);
+
+			cv::Vec3f _translationVector(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
+			cv::Matx33f _rotationMatrix;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					_rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
+				}
+			}
+
+			_translationVector_sum += _translationVector;
+			_rotationMatrix_sum += _rotationMatrix;
+		}
+
+		for (int j = 0; j < 3; j++) {
+			for (int k = 0; k < 3; k++) {
+				_rotationMatrix_sum(j, k) /= markers_on_cube.size();
+			}
+			_translationVector_sum[j] /= markers_on_cube.size();
+		}
+
+		cv::Matx33f rotationMatrix = _rotationMatrix_sum.t();
+		cv::Vec3f translationVector = _translationVector_sum;
+
+		base_cube.SetRotationMatrix(rotationMatrix);
+		base_cube.SetTranslationVector(translationVector);
+	}
 }
 
-std::vector<Cube> ca::GenerateCubes(std::vector<Marker> marker_list, int min_distance) {
+std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cube, std::vector<Marker>& marker_list, int min_distance) {
 	std::vector<Cube> detected_cubes;
 
-	for (int i = 0; i < cubeList.size(); i++) {
+	for (int i = 0; i < cube_list.size(); i++) {
 		std::vector<Marker> markers_on_cube;
 		std::vector<int> marker_positions;
+		std::vector<int> marker_rotations;
 
 		for (int j = 0; j < marker_list.size(); j++) {
-			int face_id = cubeList[i].CheckFaceOnCube(marker_list[j], min_distance);
-			if (face_id > -1) {
+			int marker_rotation = 0;
+			int face_id = cube_list[i].CheckFaceOnCube(marker_list[j], min_distance, marker_rotation);
+			if (face_id >= 0) {
 				markers_on_cube.push_back(marker_list[j]);
 				marker_positions.push_back(face_id);
+				marker_rotations.push_back(marker_rotation);
 			}
 		}
 
 		if (markers_on_cube.size() > 0) {
+			cv::Vec3f _translationVector_sum(0, 0, 0);
+			cv::Matx33f _rotationMatrix_sum(0, 0, 0, 0, 0, 0, 0, 0, 0);
+
 			for (int j = 0; j < markers_on_cube.size(); j++) {
 				cv::Mat rvec, tvec;
-				cv::solvePnP(cubeList[i].FacePoints(marker_positions[j], markerLength), markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
+				cv::solvePnP(cube_list[i].FacePoints(marker_positions[j], marker_rotations[j], markerLength, markerMargin),
+					markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
 
-				cv::Mat rotationMatrix;
-				cv::Rodrigues(rvec, rotationMatrix);
+				cv::Mat _rotationMatrix_mat;
+				cv::Rodrigues(rvec, _rotationMatrix_mat);
 
-				cv::Vec3f translation(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-				cv::Matx33f rotation;
-				for (int k = 0; k < 3; k++) {
-					for (int l = 0; l < 3; l++) {
-						rotation(k, l) = rotationMatrix.at<double>(k, l);
+				cv::Vec3f _translationVector(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
+				cv::Matx33f _rotationMatrix;
+				for (int i = 0; i < 3; i++) {
+					for (int j = 0; j < 3; j++) {
+						_rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
 					}
 				}
 
-				cubeList[i].translation = translation;
-				cubeList[i].rotation = rotation;
+				_translationVector_sum += _translationVector;
+				_rotationMatrix_sum += _rotationMatrix;
 			}
 		
-			detected_cubes.push_back(cubeList[i]);
+			for (int j = 0; j < 3; j++) {
+				for (int k = 0; k < 3; k++) {
+					_rotationMatrix_sum(j, k) /= markers_on_cube.size();
+				}
+				_translationVector_sum[j] /= markers_on_cube.size();
+			}
+
+			cv::Matx33f rotationMatrix = _rotationMatrix_sum.t();
+			cv::Vec3f translationVector = _translationVector_sum;
+
+			cube_list[i].SetRotationMatrix(rotationMatrix);
+			cube_list[i].SetTranslationVector(translationVector);
+
+			cube_list[i].GenerateTranslation(base_cube);
+
+			detected_cubes.push_back(cube_list[i]);
 		}
 	}
 
@@ -319,9 +361,11 @@ void ca::Fun() {
 	outputMarkers.clear();
 
 	capture >> frame;
-	GenerateFrames(&frame, &grayFrame, &binaryFrame, &edgeFrame);
+	GenerateFrames(frame, grayFrame, binaryFrame, edgeFrame);
 	auto canonicalMarkers = ExtractMarkersFromFrame(grayFrame, binaryFrame);
-	auto detectedCubes = GenerateCubes(canonicalMarkers, 1);
+
+	GenerateBaseCube(baseCube, canonicalMarkers, 1);
+	auto detectedCubes = GenerateCubes(cubeList, baseCube, canonicalMarkers, 1);
 
 	for (int i = 0; i < canonicalMarkers.size(); i++) {
 		outputMarkers.push_back(canonicalMarkers[i]);

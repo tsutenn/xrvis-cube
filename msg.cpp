@@ -1,6 +1,8 @@
 #include "msg.h"
 
 msg::msg(QObject* parent) : QObject(parent) {
+    camera_position = std::vector<float>(3);
+    camera_rotation = std::vector<float>(3);
 }
 
 msg::~msg()
@@ -16,11 +18,12 @@ void msg::SaveConfig()
     json["marker size"] = this->marker_size;
     json["marker length"] = this->marker_length;
     json["marker margin"] = this->marker_margin;
-    json["cube count"] = this->cube_count;
 
     json["server port"] = this->server_port;
 
     json["path"] = this->path;
+
+    json["base cube"] = this->base_cube_id;
 
     QJsonDocument doc(json);
 
@@ -56,6 +59,8 @@ bool msg::LoadConfig()
             this->server_port = json["server port"].toInt();
 
             this->path = json["path"].toString();
+
+            this->base_cube_id = json["base cube"].toInt();
 
             return true;
         }
@@ -96,7 +101,6 @@ bool msg::LoadMarkerList(const QString& path)
                 }
 
                 if (cnt % 7 == 6) {
-                    // Cube cube(cube_id, marker_size, marker_data);
                     cubes.push_back(Cube(cube_id, marker_size, marker_data));
                 }
             }
@@ -104,7 +108,28 @@ bool msg::LoadMarkerList(const QString& path)
         }
 
         file.close();
+        this->cube_count = cubes.size();
+
         return true;
     }
     return false;
+}
+
+bool msg::SetBaseCube(std::vector<Cube>& cube_list, Cube& base_cube) {
+    bool contain = false;
+
+    for (int i = 0; i < cubes.size(); i++) {
+        if (cubes[i].GetId() == base_cube_id) {
+            this->base_cube = cubes[i];
+            contain = true;
+        }
+        else {
+            this->cube_list.push_back(cubes[i]);
+        }
+    }
+
+    cube_list = this->cube_list;
+    base_cube = this->base_cube;
+
+    return contain;
 }

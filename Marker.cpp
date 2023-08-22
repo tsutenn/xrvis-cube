@@ -13,7 +13,7 @@ Marker::Marker(int size) {
 	this->marker = marker;
 }
 
-Marker::Marker(int size, std::vector<int> marker_data) {
+Marker::Marker(int size, std::vector<int>& marker_data) {
 	std::vector<std::vector<int>> marker(size, std::vector<int>(size));
 
 	for (int i = 0; i < size; i++) {
@@ -26,7 +26,7 @@ Marker::Marker(int size, std::vector<int> marker_data) {
 	this->marker = marker;
 }
 
-Marker::Marker(int size, std::vector<std::vector<int>> marker_data) {
+Marker::Marker(int size, std::vector<std::vector<int>>& marker_data) {
 	std::vector<std::vector<int>> marker(size, std::vector<int>(size));
 
 	for (int i = 0; i < size; i++) {
@@ -100,7 +100,8 @@ Marker Marker::operator+(const int& other) {
 
 	for (int i = 0; i < this->size; i++) {
 		for (int j = 0; j < this->size; j++) {
-			out.marker[i][j] = this->marker[size - j - 1][i];
+			// out.marker[i][j] = this->marker[size - j - 1][i];
+			out.marker[i][j] = this->marker[j][size - i - 1];
 		}
 	}
 
@@ -110,6 +111,33 @@ Marker Marker::operator+(const int& other) {
 Marker Marker::operator+=(const int& other) {
 	Marker out(this->size, this->marker);
 	out = out + other;
+	this->Copy(out);
+	return out;
+}
+
+Marker Marker::operator-(const int& other)
+{
+	Marker out(this->size, this->marker);
+	int o = other % 4;
+
+	if (o == 0) {
+		return out;
+	}
+
+	for (int i = 0; i < this->size; i++) {
+		for (int j = 0; j < this->size; j++) {
+			out.marker[i][j] = this->marker[size - j - 1][i];
+			// out.marker[i][j] = this->marker[j][size - i - 1];
+		}
+	}
+
+	return out - (o - 1);
+}
+
+Marker Marker::operator-=(const int& other)
+{
+	Marker out(this->size, this->marker);
+	out = out - other;
 	this->Copy(out);
 	return out;
 }
@@ -148,7 +176,10 @@ const char* Marker::ToString() {
 	}
 
 	result += "\n]";
-	return result.c_str();
+
+	char* rnt = new char[result.size() + 1];
+	std::strcpy(rnt, result.c_str());
+	return rnt;
 }
 
 

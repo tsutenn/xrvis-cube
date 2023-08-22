@@ -20,6 +20,16 @@ gui::gui(msg* data, QWidget *parent)
         ui.ssport->setValue(mydata->server_port);
 
         ui.pathbox->setText(mydata->path);
+
+        ui.basecubeid->setValue(mydata->base_cube_id);
+
+        ui.camposx->setValue(mydata->camera_position[0]);
+        ui.camposy->setValue(mydata->camera_position[1]);
+        ui.camposz->setValue(mydata->camera_position[2]);
+
+        ui.camrotx->setValue(mydata->camera_rotation[0]);
+        ui.camroty->setValue(mydata->camera_rotation[1]);
+        ui.camrotz->setValue(mydata->camera_rotation[2]);
     }
     else {
         mydata->threshold = ui.threshold->value();
@@ -28,7 +38,6 @@ gui::gui(msg* data, QWidget *parent)
         mydata->marker_size = ui.markersize->value();
         mydata->marker_length = ui.markerlength->value();
         mydata->marker_margin = ui.markermargin->value();
-        mydata->cube_count = ui.cubecount->value();
 
         mydata->server_port = ui.ssport->value();
 
@@ -50,7 +59,8 @@ void gui::SetCameraStatus(bool status) {
     ui.markersize->setReadOnly(status);
     ui.markerlength->setReadOnly(status);
     ui.markermargin->setReadOnly(status);
-    ui.cubecount->setReadOnly(status);
+
+    ui.basecubeid->setReadOnly(status);
 
     ui.cameraopen->setText(status ? "CLOSE" : "OPEN");
 
@@ -59,9 +69,8 @@ void gui::SetCameraStatus(bool status) {
     mydata->marker_size = ui.markersize->value();
     mydata->marker_length = ui.markerlength->value();
     mydata->marker_margin = ui.markermargin->value();
-    mydata->cube_count = ui.cubecount->value();
 
-    mydata->threshold = ui.threshold->value();
+    mydata->base_cube_id = ui.basecubeid->value();
 
     mydata->camera_status = status;
 }

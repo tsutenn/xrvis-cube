@@ -19,27 +19,30 @@ public:
 	bool LoopBlock();
 	int GetMarkerSize();
 
+	Cube& GetBaseCube();
+	std::vector<Cube>& GetCubeList();
+
 	void SetThreshG(int threshG);
-	void SetCubeInfo(int markerSize, double markerLength, double markerMargin, int cubeCount);
-	void SetCubeList(std::vector<Cube> cubes);
+	void SetCubeInfo(int markerSize, double markerLength, double markerMargin);
+	void SetCubeList(std::vector<Cube> cube_list, Cube base_cube);
 
 	/*
 	 *	Generate gray_frame, binary_frame and edge_frame from input frame.
 	 */
-	void GenerateFrames(cv::Mat* input, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame);
-	void GenerateFramesFromCapture(cv::Mat* raw_frame, cv::Mat* gray_frame, cv::Mat* binary_frame, cv::Mat* edge_frame);
+	void GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame);
+	void GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame);
 
 	/*
 	 *	Extract all possible markers frome input frame.
 	 */
-	std::vector<Marker> ExtractMarkersFromFrame(cv::Mat gray_frame, cv::Mat binary_frame);
+	std::vector<Marker> ExtractMarkersFromFrame(cv::Mat& gray_frame, cv::Mat& binary_frame);
 
-	std::vector<int> ca::DetectedCubeId(std::vector<Marker> marker_list, int min_distance);
+	void GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance);
 
 	/*
 	 *	 Generate translation and rotation of cubes
 	 */
-	std::vector<Cube> GenerateCubes(std::vector<Marker> markers, int min_distance);
+	std::vector<Cube> GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cube, std::vector<Marker>& markers, int min_distance);
 
 	void Fun();
 
@@ -61,11 +64,12 @@ protected:
 	int markerSize = 0;
 	double markerMargin = 0;
 	double markerLength = 0;
-	int cubeCount = 0;
 
 	cv::Size canonicalSize;
 	cv::Mat camMatrix;
 	cv::Mat distCoeff;
+
+	Cube baseCube;
 
 	std::vector<Cube> cubeList;
 

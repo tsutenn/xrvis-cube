@@ -14,15 +14,29 @@ class Marker
 
 public:
 	Marker(int size);
-	Marker(int size, std::vector<int> marker);
-	Marker(int size, std::vector<std::vector<int>> marker);
+	Marker(int size, std::vector<int>& marker);
+	Marker(int size, std::vector<std::vector<int>>& marker);
 	~Marker();
 
 	bool operator==(const Marker& other);
+
+	/*
+	 *	return the difference between two markers. 
+	 */
 	int operator-(const Marker& other);
+
+	/*
+	 *	Rotate 90 degrees counterclockwise for other times.
+	 */
 	Marker operator+(const int& other);
 	Marker operator+=(const int& other);
 	
+	/*
+	 *	Rotate 90 degrees clockwise for other times.
+	 */
+	Marker operator-(const int& other);
+	Marker operator-=(const int& other);
+
 	void Copy(const Marker& other);
 
 	int At(int x, int y);

@@ -58,74 +58,18 @@ public:
         this->outputLabel = outputLabel;
     }
 
-protected:
-    /*
-    void run() override {
-        mydata->Log("cv thread started");
-        while (!isInterruptionRequested()) {
-            if (cameraFlag) {
-                cap->Fun();
-
-                QImage image(cap->GetFrame()->data, 
-                    cap->GetFrame()->cols,
-                    cap->GetFrame()->rows,
-                    cap->GetFrame()->step,
-                    QImage::Format_RGB888);
-                image = image.rgbSwapped(); // BGR to RGB
-                frameLabel->setPixmap(QPixmap::fromImage(image));
-
-                QImage imageBin(cap->GetBinaryFrame()->data, 
-                    cap->GetBinaryFrame()->cols,
-                    cap->GetBinaryFrame()->rows,
-                    cap->GetBinaryFrame()->step,
-                    QImage::Format_Grayscale8);
-                binaryLabel->setPixmap(QPixmap::fromImage(imageBin));
-
-                QImage imageEdge(cap->GetEdgeFrame()->data, 
-                    cap->GetEdgeFrame()->cols,
-                    cap->GetEdgeFrame()->rows,
-                    cap->GetEdgeFrame()->step,
-                    QImage::Format_Grayscale8);
-                edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
-
-                if (cap->outputMarkers.size() > 0) {
-                    QImage imageOut(cap->outputMarkers[0].image.data,
-                        cap->outputMarkers[0].image.cols,
-                        cap->outputMarkers[0].image.rows,
-                        cap->outputMarkers[0].image.step,
-                        QImage::Format_Grayscale8);
-                    outputLabel->setPixmap(QPixmap::fromImage(imageOut));
-
-                    QString msg = "";
-                    for (int i = 0; i < cap->GetMarkerSize(); i++) {
-                        for (int j = 0; j < cap->GetMarkerSize(); j++) {
-                            msg += QString::number(cap->outputMarkers[0].At(j, i));
-                            msg += ",";
-                        }
-                        msg += "\n";
-                    }
-                    msg += "\n";
-
-                    mydata->Log(msg);
-                }
-                else {
-                    outputLabel->setText("OUTPUT IMAGE");
-                }
-            }
-        }
-    }
-    */
-    // /*
+protected:    
     void run() override {
         mydata->Log("cv thread started");
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
                 loopBlock = true;
 
-                cap->GenerateFramesFromCapture(&raw, &grayFrame, &binaryFrame, &edgeFrame);
+                cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
                 auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
-                // auto detected_cube_ids = cap->DetectedCubeId(detected_markers, 1);
-                auto detected_cubes = cap->GenerateCubes(detected_markers, 1);
+                
+                cap->GenerateBaseCube(mydata->base_cube, detected_markers, 1);
+                auto detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, 1);
 
                 QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
@@ -146,19 +90,21 @@ protected:
                 }
 
                 if (detected_cubes.size() > 0) {
-                    QString result = "detected cube:";
+                    QString result = "detected cubes: (" + QString::number(detected_cubes.size()) + ")\n";
                     for (int i = 0; i < detected_cubes.size(); i++) {
-                        result += " " + QString::number(detected_cubes[i].GetId()) + ",";
+                        result += "#" + QString::number(detected_cubes[i].GetId()) + "\n";
+                        result += QString::fromUtf8(detected_cubes[i].GetTransformInString()) + "\n";
+                        result += QString::fromUtf8(detected_cubes[i].GetRotationInString()) + "\n";
                     }
                     mydata->Log(result);
                 }
 
                 loopBlock = false;
-                cap->Wait(40);
+                cap->Wait(34);
             }
         }
     }
-    // */
+
     bool cameraFlag = false;
     bool loopBlock = false;
     msg* mydata;

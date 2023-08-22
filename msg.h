@@ -21,10 +21,18 @@ public:
 
     int server_port;
 
+    int base_cube_id;
+
+    std::vector<float> camera_position;
+    std::vector<float> camera_rotation;
+
     bool camera_status = false;
     bool server_status = false;
 
     std::vector<Cube> cubes;
+
+    Cube base_cube;
+    std::vector<Cube> cube_list;
 
     QString path;
 
@@ -34,6 +42,8 @@ public:
     void SaveConfig();
     bool LoadConfig();
     bool LoadMarkerList(const QString& path);
+
+    bool SetBaseCube(std::vector<Cube>& cube_list, Cube& base_cube);
 
 signals:
     void Log(const QString& message);

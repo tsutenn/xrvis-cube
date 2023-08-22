@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     QObject::connect(w.ui.cubesload, &QPushButton::clicked, [&] {
         if (mydata.LoadMarkerList(w.ui.pathbox->text())) {
             mydata.path = w.ui.pathbox->text();
+            w.ui.cubecount->setValue(mydata.cube_count);
             mydata.Log("Successfully load cube info at " + mydata.path + " (cube count: " + QString::number(mydata.cubes.size()) + ")");
         }
         else {
@@ -63,9 +64,14 @@ int main(int argc, char *argv[]) {
         else {
             w.SetCameraStatus(true);
 
+            std::vector<Cube> cube_list;
+            Cube base_cube;
+            
+            mydata.SetBaseCube(cube_list, base_cube);
+
             cap = new ca(mydata.camera_id);
-            cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin, mydata.cube_count);
-            cap->SetCubeList(mydata.cubes);
+            cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin);
+            cap->SetCubeList(cube_list, base_cube);
             cap->SetThreshG(mydata.threshold);
 
             mydata.Log("CAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
