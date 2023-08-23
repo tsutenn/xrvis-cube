@@ -95,6 +95,7 @@
     <ClCompile Include="Marker.cpp" />
     <ClCompile Include="msg.cpp" />
     <ClCompile Include="ss.cpp" />
+    <ClCompile Include="Transform.cpp" />
     <QtRcc Include="gui.qrc" />
     <QtUic Include="gui.ui" />
     <QtMoc Include="gui.h" />
@@ -105,6 +106,7 @@
   <ItemGroup>
     <ClInclude Include="ca.h" />
     <ClInclude Include="ss.h" />
+    <ClInclude Include="Transform.h" />
     <QtMoc Include="SsThread.h" />
     <QtMoc Include="msg.h" />
     <QtMoc Include="CaThread.h" />
