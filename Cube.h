@@ -5,6 +5,9 @@
 #include <opencv2/opencv.hpp>
 
 #include "Marker.h"
+#include "Transform.h"
+
+#define WINDOW_FILTER_SIZE 6
 
 class Cube
 {
@@ -79,40 +82,12 @@ public:
 	 */
 	std::vector<cv::Point3f> FacePoints(int face_id, int rotation, float length, float margin);
 
-	void SetTranslationVector(cv::Vec3f& translation);
-	void SetRotationMatrix(cv::Matx33f& rotationMatrix);
-
-	void GenerateTranslation(Cube base_cube);
-	void GenerateRotation(Cube base_cube);
-
-	cv::Vec3f CoordinateTransformation(cv::Vec3f point, Cube base_cube);
-
-	cv::Vec3f GetTranslationVector();
-	cv::Matx33f GetRotationMatrix();
-
-	cv::Vec3f GetTranslation();
-	cv::Vec4f GetRotation();
-
-	const char* GetTransformInString();
-	const char* GetRotationInString();
-
-	// Checks if a matrix is a valid rotation matrix.
-	static bool isRotationMatrix(cv::Mat& R);
-
-	// Calculates rotation matrix to euler angles
-	// The result is the same as MATLAB except the order
-	// of the euler angles ( x and z are swapped ).
-	static cv::Vec3f rotationMatrixToEulerAngles(cv::Mat& R);
+	Transform transform;
+	std::vector<Transform> buf;
+	void GenerateTransformAuto(Transform transform);
 
 protected:
 	int id;
 	int size;
 	std::vector<Marker> markers;
-
-	cv::Vec3f translationVector;
-	cv::Matx33f rotationMatrix;
-
-	cv::Vec3f translation;
-	cv::Vec4f rotation;
-	cv::Vec3f eular_angles;
 };

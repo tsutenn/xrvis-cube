@@ -7,9 +7,6 @@ Cube::Cube()
 Cube::Cube(int id, int size) {
 	this->id = id;
 	this->size = size;
-
-	this->translationVector = cv::Vec3f(0, 0, 0);
-	this->rotationMatrix = cv::Matx33f(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
 Cube::Cube(int id, int size, std::vector<std::vector<int>>& markers) {
@@ -20,9 +17,6 @@ Cube::Cube(int id, int size, std::vector<std::vector<int>>& markers) {
 
 	this->id = id;
 	this->size = size;
-
-	this->translationVector = cv::Vec3f(0, 0, 0);
-	this->rotationMatrix = cv::Matx33f(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
 Cube::~Cube() {
@@ -79,7 +73,7 @@ int Cube::CheckFaceOnCube(Marker& marker, int min_distance, int& rotation)
 std::vector<cv::Point3f> Cube::FacePoints(int face_id, float length, float margin) {
 	std::vector<cv::Point3f> result;
 	float l = length / 2;
-	float h = l;
+	float h = l + margin;
 
 	switch (face_id) {
 	case 0:
@@ -140,125 +134,13 @@ std::vector<cv::Point3f> Cube::FacePoints(int face_id, int rotation, float lengt
 	return result;
 }
 
-void Cube::SetTranslationVector(cv::Vec3f& translation)
+void Cube::GenerateTransformAuto(Transform transform)
 {
-	this->translationVector[0] = translation[0];
-	this->translationVector[1] = translation[1];
-	this->translationVector[2] = translation[2];
-}
-
-void Cube::SetRotationMatrix(cv::Matx33f& rotationMatrix)
-{
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			this->rotationMatrix(i, j) = rotationMatrix(i, j);
-		}
-	}
-}
-
-void Cube::GenerateTranslation(Cube base_cube)
-{
-	this->translation = CoordinateTransformation(cv::Vec3f(0, 0, 0), base_cube);
-}
-
-void Cube::GenerateRotation(Cube base_cube)
-{
-	cv::Vec3f x_0(1, 1, 1);
-	cv::Vec3f point_x_1 = CoordinateTransformation(cv::Vec3f(1, 1, 1), base_cube);
-	cv::Vec3f x_1 = point_x_1 - translation;
-	cv::Vec3f axis = x_0.cross(x_1) / (cv::norm(x_0) * cv::norm(x_1));
-
-	float cos_theta = x_0.dot(x_1) / (cv::norm(x_0) * cv::norm(x_1));
-	float theta = acos(cos_theta);
-
-	rotation = cv::Vec4f(axis[0] * sin(theta / 2), axis[1] * sin(theta / 2), axis[2] * sin(theta / 2), cos(theta / 2));
-}
-
-cv::Vec3f Cube::CoordinateTransformation(cv::Vec3f point, Cube base_cube)
-{
-	cv::Vec3f point_c = rotationMatrix * point + translationVector;
-	cv::Vec3f point_b = base_cube.GetRotationMatrix().t() * (point_c - base_cube.GetTranslationVector());
-	return point_b;
-}
-
-cv::Vec3f Cube::GetTranslationVector()
-{
-	return translationVector;
-}
-
-cv::Matx33f Cube::GetRotationMatrix()
-{
-	return rotationMatrix;
-}
-
-cv::Vec3f Cube::GetTranslation()
-{
-	return translation;
-}
-
-cv::Vec4f Cube::GetRotation()
-{
-	return rotation;
-}
-
-const char* Cube::GetTransformInString() {
-	std::string translationStr = "Translation: [" +
-		std::to_string(translation[0]) + ", " +
-		std::to_string(translation[1]) + ", " +
-		std::to_string(translation[2]) + "]";
-
-	char* result = new char[translationStr.size() + 1];
-	std::strcpy(result, translationStr.c_str());
-
-	return result;
-}
-
-const char* Cube::GetRotationInString()
-{
-	std::string rotationStr = "Rotation: [" +
-		std::to_string(rotation[0]) + ", " +
-		std::to_string(rotation[1]) + ", " +
-		std::to_string(rotation[2]) + ", " +
-		std::to_string(rotation[3]) + "]";
-
-	char* result = new char[rotationStr.size() + 1];
-	std::strcpy(result, rotationStr.c_str());
-
-	return result;
-}
-
-bool Cube::isRotationMatrix(cv::Mat& R)
-{
-	cv::Mat Rt;
-	transpose(R, Rt);
-	cv::Mat shouldBeIdentity = Rt * R;
-	cv::Mat I = cv::Mat::eye(3, 3, shouldBeIdentity.type());
-
-	return  norm(I, shouldBeIdentity) < 1e-6;
-}
-
-cv::Vec3f Cube::rotationMatrixToEulerAngles(cv::Mat& R)
-{
-
-	assert(isRotationMatrix(R));
-
-	float sy = sqrt(R.at<double>(0, 0) * R.at<double>(0, 0) + R.at<double>(1, 0) * R.at<double>(1, 0));
-
-	bool singular = sy < 1e-6; 
-
-	float x, y, z;
-	if (!singular)
-	{
-		x = atan2(R.at<double>(2, 1), R.at<double>(2, 2));
-		y = atan2(-R.at<double>(2, 0), sy);
-		z = atan2(R.at<double>(1, 0), R.at<double>(0, 0));
-	}
-	else
-	{
-		x = atan2(-R.at<double>(1, 2), R.at<double>(1, 1));
-		y = atan2(-R.at<double>(2, 0), sy);
-		z = 0;
+	if (buf.size() >= WINDOW_FILTER_SIZE) {
+		buf.erase(buf.begin());
 	}
 
-	return cv::Vec3f(x, y, z) * 180 / CV_PI;
+	buf.push_back(transform);
+
+	this->transform = Transform::Average(buf);
 }

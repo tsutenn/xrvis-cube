@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     CaThread* ct;
     SsThread* st;
 
-    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
+    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge, 3);
     ct->start();
     ct->setOutput(w.ui.outputlabel);
 

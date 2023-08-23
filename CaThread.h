@@ -22,6 +22,19 @@ public:
         this->outputLabel = nullptr;
     }
 
+    CaThread(msg* data, QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, int min_distance, QObject* parent = nullptr) : QThread(parent) {
+        this->cap = nullptr;
+        this->mydata = data;
+
+        this->frameLabel = frameLabel;
+        this->binaryLabel = binaryLabel;
+        this->edgeLabel = edgeLabel;
+
+        this->min_distance = min_distance;
+
+        this->outputLabel = nullptr;
+    }
+
     ~CaThread() {
         raw.release();
         grayFrame.release();
@@ -62,6 +75,7 @@ public:
 protected:    
     void run() override {
         mydata->Log("cv thread started");
+
         while (!isInterruptionRequested()) {
             if (cameraFlag) {
                 mydata->camera_loop = true;
@@ -70,8 +84,8 @@ protected:
                 cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
                 auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
                 
-                cap->GenerateBaseCube(mydata->base_cube, detected_markers, 1);
-                mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, 1);
+                cap->GenerateBaseCube(mydata->base_cube, detected_markers, min_distance);
+                mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, min_distance);
 
                 QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
@@ -95,8 +109,8 @@ protected:
                     QString result = "detected cubes: (" + QString::number(mydata->detected_cubes.size()) + ")\n";
                     for (int i = 0; i < mydata->detected_cubes.size(); i++) {
                         result += "#" + QString::number(mydata->detected_cubes[i].GetId()) + "\n";
-                        result += QString::fromUtf8(mydata->detected_cubes[i].GetTransformInString()) + "\n";
-                        result += QString::fromUtf8(mydata->detected_cubes[i].GetRotationInString()) + "\n";
+                        result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetPositionString()) + "\n";
+                        result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetRotationString()) + "\n";
                     }
                     mydata->Log(result);
                 }
@@ -121,4 +135,6 @@ protected:
     cv::Mat grayFrame;
     cv::Mat binaryFrame;
     cv::Mat edgeFrame;
+
+    int min_distance = 0;
 };

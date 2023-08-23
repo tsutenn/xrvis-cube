@@ -35,7 +35,7 @@ void Transform::TransformToCoordinates(Transform& target_transform)
 	cv::Vec3f op = point - cv::Vec3f::zeros();
 
 	cv::Vec3f point_t = ToCoordinates(point, target_transform);
-	cv::Vec3f op_t = point_t - translation;
+	cv::Vec3f op_t = point_t - position;
 
 	cv::Vec3f axis = op.cross(op_t) / (cv::norm(op) * cv::norm(op_t));
 
@@ -122,9 +122,7 @@ Transform Transform::Average(std::vector<Transform> transform_list)
 			average_transform.rotationMatrix(i, j) /= transform_list.size();
 		}
 	}
-	average_transform.rotationMatrix = average_transform.rotationMatrix / cv::norm(average_transform.rotationMatrix);
+	// average_transform.rotationMatrix = average_transform.rotationMatrix / cv::norm(average_transform.rotationMatrix);
 
 	return average_transform;
 }
-
-

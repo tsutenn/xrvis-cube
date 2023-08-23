@@ -23,5 +23,5 @@ public:
 
 	Transform& Transform::operator=(const Transform& other);
 
-	Transform Average(std::vector<Transform>);
+	static Transform Average(std::vector<Transform>);
 };

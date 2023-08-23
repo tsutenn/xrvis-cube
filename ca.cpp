@@ -93,16 +93,16 @@ float ca::Perimeter(const std::vector<cv::Point>& a)
 }
 
 void ca::GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame) {
-	//cv::Mat _binaryFrame;
+	cv::Mat _binaryFrame;
 
 	cv::cvtColor(input, gray_frame, cv::COLOR_BGRA2GRAY);
-	//cv::threshold(*gray_frame, _binaryFrame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
-	//morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
-	//morphologyEx(_binaryFrame, *binary_frame, cv::MORPH_CLOSE, cv::Mat());
-	cv::threshold(gray_frame, binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
+	cv::threshold(gray_frame, _binaryFrame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
+	morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
+	morphologyEx(_binaryFrame, binary_frame, cv::MORPH_CLOSE, cv::Mat());
+	// cv::threshold(gray_frame, binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
 	cv::Canny(binary_frame, edge_frame, 100, 200);
 
-	//_binaryFrame.release();
+	_binaryFrame.release();
 }
 
 void ca::GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame)
@@ -254,10 +254,11 @@ void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int
 	}
 
 	if (markers_on_cube.size() > 0) {
-		cv::Vec3f _translationVector_sum(0, 0, 0);
-		cv::Matx33f _rotationMatrix_sum(0, 0, 0, 0, 0, 0, 0, 0, 0);
+		std::vector<Transform> transform_list;
 
 		for (int j = 0; j < markers_on_cube.size(); j++) {
+			Transform _transform;
+
 			cv::Mat rvec, tvec;
 			cv::solvePnP(base_cube.FacePoints(marker_positions[j], marker_rotations[j], markerLength, markerMargin),
 				markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
@@ -265,30 +266,17 @@ void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int
 			cv::Mat _rotationMatrix_mat;
 			cv::Rodrigues(rvec, _rotationMatrix_mat);
 
-			cv::Vec3f _translationVector(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-			cv::Matx33f _rotationMatrix;
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
-					_rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
+					_transform.rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
 				}
+				_transform.translation[i] = tvec.at<double>(i, 0);
 			}
 
-			_translationVector_sum += _translationVector;
-			_rotationMatrix_sum += _rotationMatrix;
+			transform_list.push_back(_transform);
 		}
 
-		cv::Matx33f rotationMatrix;
-		cv::Vec3f translationVector;
-
-		for (int j = 0; j < 3; j++) {
-			for (int k = 0; k < 3; k++) {
-				rotationMatrix(j, k) = _rotationMatrix_sum(j, k) / markers_on_cube.size();
-			}
-			translationVector[j] = _translationVector_sum[j] / markers_on_cube.size();
-		}
-
-		base_cube.SetRotationMatrix(rotationMatrix);
-		base_cube.SetTranslationVector(translationVector);
+		base_cube.GenerateTransformAuto(Transform::Average(transform_list));
 	}
 }
 
@@ -311,10 +299,11 @@ std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cub
 		}
 
 		if (markers_on_cube.size() > 0) {
-			cv::Vec3f _translationVector_sum(0, 0, 0);
-			cv::Matx33f _rotationMatrix_sum(0, 0, 0, 0, 0, 0, 0, 0, 0);
+			std::vector<Transform> transform_list;
 
 			for (int j = 0; j < markers_on_cube.size(); j++) {
+				Transform _transform;
+
 				cv::Mat rvec, tvec;
 				cv::solvePnP(cube_list[i].FacePoints(marker_positions[j], marker_rotations[j], markerLength, markerMargin),
 					markers_on_cube[j].points, camMatrix, distCoeff, rvec, tvec);
@@ -322,34 +311,19 @@ std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cub
 				cv::Mat _rotationMatrix_mat;
 				cv::Rodrigues(rvec, _rotationMatrix_mat);
 
-				cv::Vec3f _translationVector(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-				cv::Matx33f _rotationMatrix;
 				for (int i = 0; i < 3; i++) {
 					for (int j = 0; j < 3; j++) {
-						_rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
+						_transform.rotationMatrix(i, j) = _rotationMatrix_mat.at<double>(i, j);
 					}
+					_transform.translation[i] = tvec.at<double>(i, 0);
 				}
 
-				_translationVector_sum += _translationVector;
-				_rotationMatrix_sum += _rotationMatrix;
+				transform_list.push_back(_transform);
 			}
 		
-			cv::Matx33f rotationMatrix;
-			cv::Vec3f translationVector;
-
-			for (int j = 0; j < 3; j++) {
-				for (int k = 0; k < 3; k++) {
-					rotationMatrix(j, k) = _rotationMatrix_sum(j, k) / markers_on_cube.size();
-				}
-				translationVector[j] = _translationVector_sum[j] / markers_on_cube.size();
-			}
-
-			cube_list[i].SetRotationMatrix(rotationMatrix);
-			cube_list[i].SetTranslationVector(translationVector);
-
-			cube_list[i].GenerateTranslation(base_cube);
-			cube_list[i].GenerateRotation(base_cube);
-
+			Transform transform = Transform::Average(transform_list);
+			transform.TransformToCoordinates(base_cube.transform);
+			cube_list[i].GenerateTransformAuto(transform);
 			detected_cubes.push_back(cube_list[i]);
 		}
 	}
