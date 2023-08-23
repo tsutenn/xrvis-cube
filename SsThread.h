@@ -56,9 +56,9 @@ protected:
                 QString message = "";
                 for (int i = 0; i < detected_cubes.size(); i++) {
                     message += QString::number(detected_cubes[i].GetId()) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[0]) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[1]) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[2]) + ",";
+                    message += QString::number(detected_cubes[i].transform.position[0] + mydata->base_position[0]) + ",";
+                    message += QString::number(detected_cubes[i].transform.position[1] + mydata->base_position[1]) + ",";
+                    message += QString::number(detected_cubes[i].transform.position[2] + mydata->base_position[2]) + ",";
                     message += QString::number(detected_cubes[i].transform.rotation[0]) + ",";
                     message += QString::number(detected_cubes[i].transform.rotation[1]) + ",";
                     message += QString::number(detected_cubes[i].transform.rotation[2]) + ",";

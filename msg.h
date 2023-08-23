@@ -23,8 +23,7 @@ public:
 
     int base_cube_id;
 
-    std::vector<float> camera_position;
-    std::vector<float> camera_rotation;
+    std::vector<float> base_position;
 
     bool camera_status = false;
     bool server_status = false;
@@ -53,4 +52,3 @@ public:
 signals:
     void Log(const QString& message);
 };
-

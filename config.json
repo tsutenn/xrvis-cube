@@ -1,10 +1,13 @@
 {
     "base cube": 3,
+    "base x": 2,
+    "base y": 0,
+    "base z": 0,
     "camera id": 0,
     "marker length": 24.89,
     "marker margin": 3.56,
     "marker size": 5,
     "path": "markers.txt",
     "server port": 1228,
-    "threshold": 108
+    "threshold": 95
 }

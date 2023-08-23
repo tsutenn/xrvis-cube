@@ -23,13 +23,9 @@ gui::gui(msg* data, QWidget *parent)
 
         ui.basecubeid->setValue(mydata->base_cube_id);
 
-        ui.camposx->setValue(mydata->camera_position[0]);
-        ui.camposy->setValue(mydata->camera_position[1]);
-        ui.camposz->setValue(mydata->camera_position[2]);
-
-        ui.camrotx->setValue(mydata->camera_rotation[0]);
-        ui.camroty->setValue(mydata->camera_rotation[1]);
-        ui.camrotz->setValue(mydata->camera_rotation[2]);
+        ui.baseposx->setValue(mydata->base_position[0]);
+        ui.baseposy->setValue(mydata->base_position[1]);
+        ui.baseposz->setValue(mydata->base_position[2]);
     }
     else {
         mydata->threshold = ui.threshold->value();
@@ -42,6 +38,12 @@ gui::gui(msg* data, QWidget *parent)
         mydata->server_port = ui.ssport->value();
 
         mydata->path = ui.pathbox->text();
+
+        mydata->base_cube_id = ui.basecubeid->value();
+
+        mydata->base_position[0] = ui.baseposx->value();
+        mydata->base_position[1] = ui.baseposy->value();
+        mydata->base_position[2] = ui.baseposz->value();
     }
 
     ui.LogPanel->setStyleSheet("background: transparent;");
@@ -62,6 +64,10 @@ void gui::SetCameraStatus(bool status) {
 
     ui.basecubeid->setReadOnly(status);
 
+    ui.baseposx->setReadOnly(status);
+    ui.baseposy->setReadOnly(status);
+    ui.baseposz->setReadOnly(status);
+
     ui.cameraopen->setText(status ? "CLOSE" : "OPEN");
 
     mydata->camera_id = ui.cameraid->value();
@@ -71,6 +77,10 @@ void gui::SetCameraStatus(bool status) {
     mydata->marker_margin = ui.markermargin->value();
 
     mydata->base_cube_id = ui.basecubeid->value();
+
+    mydata->base_position[0] = ui.baseposx->value();
+    mydata->base_position[1] = ui.baseposy->value();
+    mydata->base_position[2] = ui.baseposz->value();
 
     mydata->camera_status = status;
 }

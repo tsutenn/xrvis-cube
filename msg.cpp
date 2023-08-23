@@ -1,8 +1,7 @@
 #include "msg.h"
 
 msg::msg(QObject* parent) : QObject(parent) {
-    camera_position = std::vector<float>(3);
-    camera_rotation = std::vector<float>(3);
+    base_position = std::vector<float>(3);
 }
 
 msg::~msg()
@@ -24,6 +23,10 @@ void msg::SaveConfig()
     json["path"] = this->path;
 
     json["base cube"] = this->base_cube_id;
+
+    json["base x"] = this->base_position[0];
+    json["base y"] = this->base_position[1];
+    json["base z"] = this->base_position[2];
 
     QJsonDocument doc(json);
 
@@ -61,6 +64,10 @@ bool msg::LoadConfig()
             this->path = json["path"].toString();
 
             this->base_cube_id = json["base cube"].toInt();
+
+            this->base_position[0] = json["base x"].toDouble();
+            this->base_position[1] = json["base x"].toDouble();
+            this->base_position[2] = json["base x"].toDouble();
 
             return true;
         }
