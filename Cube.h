@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <algorithm>
-#include<opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 
 #include "Marker.h"
 
@@ -83,6 +83,9 @@ public:
 	void SetRotationMatrix(cv::Matx33f& rotationMatrix);
 
 	void GenerateTranslation(Cube base_cube);
+	void GenerateRotation(Cube base_cube);
+
+	cv::Vec3f CoordinateTransformation(cv::Vec3f point, Cube base_cube);
 
 	cv::Vec3f GetTranslationVector();
 	cv::Matx33f GetRotationMatrix();
@@ -111,4 +114,5 @@ protected:
 
 	cv::Vec3f translation;
 	cv::Vec4f rotation;
+	cv::Vec3f eular_angles;
 };

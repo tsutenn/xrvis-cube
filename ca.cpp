@@ -348,6 +348,7 @@ std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cub
 			cube_list[i].SetTranslationVector(translationVector);
 
 			cube_list[i].GenerateTranslation(base_cube);
+			cube_list[i].GenerateRotation(base_cube);
 
 			detected_cubes.push_back(cube_list[i]);
 		}

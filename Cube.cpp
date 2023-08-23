@@ -158,7 +158,27 @@ void Cube::SetRotationMatrix(cv::Matx33f& rotationMatrix)
 
 void Cube::GenerateTranslation(Cube base_cube)
 {
-	this->translation = base_cube.GetRotationMatrix().t() * (this->translationVector - base_cube.GetTranslationVector());
+	this->translation = CoordinateTransformation(cv::Vec3f(0, 0, 0), base_cube);
+}
+
+void Cube::GenerateRotation(Cube base_cube)
+{
+	cv::Vec3f x_0(1, 1, 1);
+	cv::Vec3f point_x_1 = CoordinateTransformation(cv::Vec3f(1, 1, 1), base_cube);
+	cv::Vec3f x_1 = point_x_1 - translation;
+	cv::Vec3f axis = x_0.cross(x_1) / (cv::norm(x_0) * cv::norm(x_1));
+
+	float cos_theta = x_0.dot(x_1) / (cv::norm(x_0) * cv::norm(x_1));
+	float theta = acos(cos_theta);
+
+	rotation = cv::Vec4f(axis[0] * sin(theta / 2), axis[1] * sin(theta / 2), axis[2] * sin(theta / 2), cos(theta / 2));
+}
+
+cv::Vec3f Cube::CoordinateTransformation(cv::Vec3f point, Cube base_cube)
+{
+	cv::Vec3f point_c = rotationMatrix * point + translationVector;
+	cv::Vec3f point_b = base_cube.GetRotationMatrix().t() * (point_c - base_cube.GetTranslationVector());
+	return point_b;
 }
 
 cv::Vec3f Cube::GetTranslationVector()
