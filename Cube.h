@@ -7,7 +7,7 @@
 #include "Marker.h"
 #include "Transform.h"
 
-#define WINDOW_FILTER_SIZE 6
+#define WINDOW_FILTER_SIZE 3
 
 class Cube
 {

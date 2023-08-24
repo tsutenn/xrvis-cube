@@ -84,7 +84,7 @@ protected:
                 cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
                 auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
                 
-                cap->GenerateBaseCube(mydata->base_cube, detected_markers, min_distance);
+                auto base_markers = cap->GenerateBaseCube(mydata->base_cube, detected_markers, min_distance);
                 mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, min_distance);
 
                 QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
@@ -97,12 +97,12 @@ protected:
                 QImage imageEdge(edgeFrame.data, edgeFrame.cols, edgeFrame.rows, edgeFrame.step, QImage::Format_Grayscale8);
                 edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
-                if (detected_markers.size() > 0) {
-                    QImage imageOut(detected_markers[0].image.data, detected_markers[0].image.cols, detected_markers[0].image.rows, detected_markers[0].image.step, QImage::Format_Grayscale8);
+                if (base_markers.size() > 0) {
+                    QImage imageOut(base_markers[0].image.data, base_markers[0].image.cols, base_markers[0].image.rows, base_markers[0].image.step, QImage::Format_Grayscale8);
                     this->outputLabel->setPixmap(QPixmap::fromImage(imageOut));
                 }
                 else {
-                    outputLabel->setText("OUTPUT IMAGE");
+                    outputLabel->setText("NO BASECUBE");
                 }
 
                 if (mydata->detected_cubes.size() > 0) {

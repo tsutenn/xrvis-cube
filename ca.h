@@ -37,7 +37,7 @@ public:
 	 */
 	std::vector<Marker> ExtractMarkersFromFrame(cv::Mat& gray_frame, cv::Mat& binary_frame);
 
-	void GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance);
+	std::vector<Marker> GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance);
 
 	/*
 	 *	 Generate translation and rotation of cubes

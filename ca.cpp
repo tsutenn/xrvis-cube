@@ -13,8 +13,11 @@ ca::ca(int camera_id) {
 	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, canonicalSize.height - 1));
 	this->m_markerCorners2f.push_back(cv::Point2f(0, canonicalSize.height - 1));
 
-	this->camMatrix = (cv::Mat_<double>(3, 3) << 922.80181267, 0, 277.82133, 0, 915.382409, 197.2520247, 0, 0, 1);
-	this->distCoeff = (cv::Mat_<double>(5, 1) << -0.4106936737, 0.1123164, -0.00748416, 0.00330122, 4.88862);
+	//this->camMatrix = (cv::Mat_<double>(3, 3) << 922.80181267, 0, 277.82133, 0, 915.382409, 197.2520247, 0, 0, 1);
+	//this->distCoeff = (cv::Mat_<double>(5, 1) << -0.4106936737, 0.1123164, -0.00748416, 0.00330122, 4.88862);
+
+	this->camMatrix = (cv::Mat_<double>(3, 3) << 896.8655716001124, 0, 337.0996608643468, 0, 895.8676984030446, 248.6402429023775, 0, 0, 1);
+	this->distCoeff = (cv::Mat_<double>(5, 1) << -0.3160636131931209, -2.481283726165089, -0.003328328493339427, -0.0005555183747696143, 22.0213498782796);
 }
 
 ca::~ca() {
@@ -238,7 +241,7 @@ std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat& gray_frame, cv::Mat& bi
 	return canonicalMarkers;
 }
 
-void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance){
+std::vector<Marker> ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int min_distance){
 	std::vector<Marker> markers_on_cube;
 	std::vector<int> marker_positions;
 	std::vector<int> marker_rotations;
@@ -276,8 +279,10 @@ void ca::GenerateBaseCube(Cube& base_cube, std::vector<Marker>& marker_list, int
 			transform_list.push_back(_transform);
 		}
 
-		base_cube.GenerateTransformAuto(Transform::Average(transform_list));
+		base_cube.transform = Transform::Average(transform_list);
 	}
+
+	return markers_on_cube;
 }
 
 std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cube, std::vector<Marker>& marker_list, int min_distance) {
@@ -324,6 +329,7 @@ std::vector<Cube> ca::GenerateCubes(std::vector<Cube>& cube_list, Cube& base_cub
 			Transform transform = Transform::Average(transform_list);
 			transform.TransformToCoordinates(base_cube.transform);
 			cube_list[i].GenerateTransformAuto(transform);
+			//cube_list[i].transform = transform;
 			detected_cubes.push_back(cube_list[i]);
 		}
 	}

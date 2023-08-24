@@ -31,18 +31,45 @@ void Transform::TransformToCoordinates(Transform& target_transform)
 {
 	position = ToCoordinates(cv::Vec3f::zeros(), target_transform);
 	
-	cv::Vec3f point(1, 1, 1);
-	cv::Vec3f op = point - cv::Vec3f::zeros();
+	/*
+	cv::Vec3f p(1, 1, 1);
+	cv::Vec3f o(0, 0, 0);
+	cv::Vec3f op = p - o;
 
-	cv::Vec3f point_t = ToCoordinates(point, target_transform);
-	cv::Vec3f op_t = point_t - position;
+	cv::Vec3f p_t = ToCoordinates(p, target_transform);
+	cv::Vec3f o_t = ToCoordinates(o, target_transform);
+	cv::Vec3f op_t = p_t - o_t;
 
-	cv::Vec3f axis = op.cross(op_t) / (cv::norm(op) * cv::norm(op_t));
+	cv::Vec3f axis = op.cross(op_t);
+	if (cv::norm(op.cross(op_t)) > 0) {
+		axis /= cv::norm(op.cross(op_t));
+	}
 
 	float cos_theta = op.dot(op_t) / (cv::norm(op) * cv::norm(op_t));
 	float theta = acos(cos_theta);
 
 	rotation = cv::Vec4f(axis[0] * sin(theta / 2), axis[1] * sin(theta / 2), axis[2] * sin(theta / 2), cos(theta / 2));
+	*/
+
+	cv::Vec3f rotationVector;
+	cv::Vec3f x(1, 0, 0);
+	cv::Vec3f y(0, 1, 0);
+	cv::Vec3f z(0, 0, 1);
+
+	x = ToCoordinates(x, target_transform);
+	y = ToCoordinates(y, target_transform);
+	z = ToCoordinates(z, target_transform);
+
+	cv::Matx33f r((x - position)[0], (y - position)[0], (z - position)[0], 
+				  (x - position)[1], (y - position)[1], (z - position)[1],
+				  (x - position)[2], (y - position)[2], (z - position)[2]);
+	
+	cv::Rodrigues(r, rotationVector);
+
+	float angle = cv::norm(rotationVector);
+	cv::Vec3f axis = rotationVector / angle;
+
+	rotation = cv::Vec4f(axis[0] * std::sin(angle / 2), axis[1] * std::sin(angle / 2), axis[2] * std::sin(angle / 2), std::cos(angle / 2));
 }
 
 const char* Transform::GetPositionString()
