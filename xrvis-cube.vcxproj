@@ -60,8 +60,15 @@
     <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;C:\envs\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>D:\Users\citun\Documents\opencv\build\include;D:\Users\citun\Documents\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalDependencies>opencv_world470.lib;opencv_world470d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
       <AdditionalDependencies>opencv_world470.lib;opencv_world470d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
