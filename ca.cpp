@@ -13,11 +13,32 @@ ca::ca(int camera_id) {
 	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, canonicalSize.height - 1));
 	this->m_markerCorners2f.push_back(cv::Point2f(0, canonicalSize.height - 1));
 
-	//this->camMatrix = (cv::Mat_<double>(3, 3) << 922.80181267, 0, 277.82133, 0, 915.382409, 197.2520247, 0, 0, 1);
-	//this->distCoeff = (cv::Mat_<double>(5, 1) << -0.4106936737, 0.1123164, -0.00748416, 0.00330122, 4.88862);
+	this->camMatrix = (cv::Mat_<double>(3, 3) << 896.8655716001124, 0, 337.0996608643468, 
+												 0, 895.8676984030446, 248.6402429023775, 
+												 0, 0, 1);
+	this->distCoeff = (cv::Mat_<double>(5, 1) << -0.3160636131931209, -2.481283726165089, -0.003328328493339427, 
+												 -0.0005555183747696143, 22.0213498782796);
+}
 
-	this->camMatrix = (cv::Mat_<double>(3, 3) << 896.8655716001124, 0, 337.0996608643468, 0, 895.8676984030446, 248.6402429023775, 0, 0, 1);
-	this->distCoeff = (cv::Mat_<double>(5, 1) << -0.3160636131931209, -2.481283726165089, -0.003328328493339427, -0.0005555183747696143, 22.0213498782796);
+ca::ca(int camera_id, std::vector<double> cam_matrix, std::vector<double> dist_coeff)
+{
+	this->capture.open(camera_id);
+	this->capture.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+	this->capture.set(cv::CAP_PROP_FPS, 30);
+
+	this->canonicalSize.width = 128;
+	this->canonicalSize.height = 128;
+
+	this->m_markerCorners2f.push_back(cv::Point2f(0, 0));
+	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, 0));
+	this->m_markerCorners2f.push_back(cv::Point2f(canonicalSize.width - 1, canonicalSize.height - 1));
+	this->m_markerCorners2f.push_back(cv::Point2f(0, canonicalSize.height - 1));
+
+	this->camMatrix = (cv::Mat_<double>(3, 3) << cam_matrix[0], cam_matrix[1], cam_matrix[2],
+												 cam_matrix[3], cam_matrix[4], cam_matrix[5],
+												 cam_matrix[6], cam_matrix[7], cam_matrix[8]);
+	this->distCoeff = (cv::Mat_<double>(5, 1) << dist_coeff[0], dist_coeff[1], dist_coeff[2],
+												 dist_coeff[3], dist_coeff[4]);
 }
 
 ca::~ca() {

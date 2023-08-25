@@ -64,7 +64,7 @@ protected:
                     message += QString::number(detected_cubes[i].transform.rotation[2]) + ",";
                     message += QString::number(detected_cubes[i].transform.rotation[3]) + "\n";
                 }
-                qDebug() << message << endl;
+                // qDebug() << message << endl;
                 server->response(clientAddress, message.toUtf8());
 
                 mydata->server_loop = false;

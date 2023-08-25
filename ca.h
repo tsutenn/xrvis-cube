@@ -10,6 +10,7 @@ class ca
 {
 public:
 	ca(int camera_id);
+	ca(int camera_id, std::vector<double> cam_matrix, std::vector<double> dist_coeff);
 	~ca();
 
 	cv::Mat* GetFrame();

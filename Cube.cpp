@@ -136,11 +136,16 @@ std::vector<cv::Point3f> Cube::FacePoints(int face_id, int rotation, float lengt
 
 void Cube::GenerateTransformAuto(Transform transform)
 {
-	if (buf.size() >= WINDOW_FILTER_SIZE) {
+	if (buf.size() >= FILTER_WINDOW_SIZE) {
 		buf.erase(buf.begin());
 	}
 
 	buf.push_back(transform);
 
 	this->transform = Transform::Average(buf);
+}
+
+
+void Cube::SetFilterWindowSize(int size) {
+	FILTER_WINDOW_SIZE = size;
 }

@@ -44,6 +44,11 @@ gui::gui(msg* data, QWidget *parent)
         mydata->base_position[0] = ui.baseposx->value();
         mydata->base_position[1] = ui.baseposy->value();
         mydata->base_position[2] = ui.baseposz->value();
+
+        mydata->marker_min_distance = 0;
+        mydata->filter_window_size = 3;
+        mydata->cam_matrix = std::vector<double>(9);
+        mydata->dist_coeff = std::vector<double>(5);
     }
 
     ui.LogPanel->setStyleSheet("background: transparent;");

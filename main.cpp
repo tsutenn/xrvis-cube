@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     CaThread* ct;
     SsThread* st;
 
-    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge, 3);
+    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
     ct->start();
     ct->setOutput(w.ui.outputlabel);
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
             
             mydata.SetBaseCube(cube_list, base_cube);
 
-            cap = new ca(mydata.camera_id);
+            cap = new ca(mydata.camera_id, mydata.cam_matrix, mydata.dist_coeff);
             cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin);
             cap->SetCubeList(cube_list, base_cube);
             cap->SetThreshG(mydata.threshold);

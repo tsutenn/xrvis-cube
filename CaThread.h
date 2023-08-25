@@ -22,19 +22,6 @@ public:
         this->outputLabel = nullptr;
     }
 
-    CaThread(msg* data, QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, int min_distance, QObject* parent = nullptr) : QThread(parent) {
-        this->cap = nullptr;
-        this->mydata = data;
-
-        this->frameLabel = frameLabel;
-        this->binaryLabel = binaryLabel;
-        this->edgeLabel = edgeLabel;
-
-        this->min_distance = min_distance;
-
-        this->outputLabel = nullptr;
-    }
-
     ~CaThread() {
         raw.release();
         grayFrame.release();
@@ -84,8 +71,8 @@ protected:
                 cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
                 auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
                 
-                auto base_markers = cap->GenerateBaseCube(mydata->base_cube, detected_markers, min_distance);
-                mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, min_distance);
+                auto base_markers = cap->GenerateBaseCube(mydata->base_cube, detected_markers, mydata->marker_min_distance);
+                mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, mydata->marker_min_distance);
 
                 QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
                 image = image.rgbSwapped(); // BGR to RGB
@@ -135,6 +122,4 @@ protected:
     cv::Mat grayFrame;
     cv::Mat binaryFrame;
     cv::Mat edgeFrame;
-
-    int min_distance = 0;
 };

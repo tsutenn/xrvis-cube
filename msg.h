@@ -40,6 +40,11 @@ public:
 
     QString path;
 
+    int marker_min_distance;
+    int filter_window_size;
+    std::vector<double> cam_matrix;
+    std::vector<double> dist_coeff;
+
     msg(QObject* parent = nullptr);
     ~msg();
 

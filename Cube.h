@@ -7,8 +7,6 @@
 #include "Marker.h"
 #include "Transform.h"
 
-#define WINDOW_FILTER_SIZE 3
-
 class Cube
 {
 public:
@@ -86,8 +84,12 @@ public:
 	std::vector<Transform> buf;
 	void GenerateTransformAuto(Transform transform);
 
+	void SetFilterWindowSize(int size);
+
 protected:
 	int id;
 	int size;
 	std::vector<Marker> markers;
+
+	int FILTER_WINDOW_SIZE = 3;
 };

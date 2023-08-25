@@ -28,6 +28,27 @@ void msg::SaveConfig()
     json["base y"] = this->base_position[1];
     json["base z"] = this->base_position[2];
 
+    json["marker min_distance"] = this->marker_min_distance;
+    json["filter window size"] = this->filter_window_size;
+
+    QString cam_matrix_str = "";
+    for (int i = 0; i < this->cam_matrix.size(); i++) {
+        cam_matrix_str += QString::number(cam_matrix[i]);
+        if (i != this->cam_matrix.size()) {
+            cam_matrix_str += ",";
+        }
+    }
+    json["camera matrix"] = cam_matrix_str;
+
+    QString dist_coeff_str = "";
+    for (int i = 0; i < this->dist_coeff.size(); i++) {
+        dist_coeff_str += QString::number(dist_coeff[i]);
+        if (i != this->dist_coeff.size()) {
+            dist_coeff_str += ",";
+        }
+    }
+    json["distortion coefficients"] = dist_coeff_str;
+
     QJsonDocument doc(json);
 
     QFile file("config.json");
@@ -69,6 +90,30 @@ bool msg::LoadConfig()
             this->base_position[1] = json["base x"].toDouble();
             this->base_position[2] = json["base x"].toDouble();
 
+            this->marker_min_distance = json["marker min_distance"].toInt();
+            this->filter_window_size = json["filter window size"].toInt();
+
+            QString cam_matrix_str = json["camera matrix"].toString();
+            QString dist_coeff_str = json["distortion coefficients"].toString();
+
+            QStringList stringList1 = cam_matrix_str.split(",");
+            for (const QString& str : stringList1) {
+                bool conversionOk = false;
+                double value = str.toDouble(&conversionOk);
+                if (conversionOk) {
+                    this->cam_matrix.push_back(value);
+                }
+            }
+
+            QStringList stringList2 = dist_coeff_str.split(",");
+            for (const QString& str : stringList2) {
+                bool conversionOk = false;
+                double value = str.toDouble(&conversionOk);
+                if (conversionOk) {
+                    this->dist_coeff.push_back(value);
+                }
+            }
+
             return true;
         }
     }
@@ -108,7 +153,9 @@ bool msg::LoadMarkerList(const QString& path)
                 }
 
                 if (cnt % 7 == 6) {
-                    cubes.push_back(Cube(cube_id, marker_size, marker_data));
+                    Cube cube(cube_id, marker_size, marker_data);
+                    cube.SetFilterWindowSize(filter_window_size);
+                    cubes.push_back(cube);
                 }
             }
             cnt++;
