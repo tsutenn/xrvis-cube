@@ -122,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="markers.txt" />
