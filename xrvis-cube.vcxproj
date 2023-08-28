@@ -14,7 +14,7 @@
     <ProjectGuid>{5112E804-059A-47DE-9D80-70CD322F2F4B}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.22000.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -60,8 +60,8 @@
     <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;C:\envs\opencv\build\x64\vc16\lib;D:\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>D:\Users\citun\Documents\opencv\build\include;D:\Users\citun\Documents\opencv\build\include\opencv2;C:\envs\opencv\build\include;C:\envs\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;C:\envs\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Users\citun\Documents\opencv\build\include;D:\Users\citun\Documents\opencv\build\include\opencv2;C:\envs\opencv\build\include;C:\envs\opencv\build\include\opencv2;D:\opencv\build\include;D:\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Users\citun\Documents\opencv\build\x64\vc16\lib;C:\envs\opencv\build\x64\vc16\lib;D:\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
