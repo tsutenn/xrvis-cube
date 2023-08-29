@@ -133,4 +133,9 @@
   </ImportGroup>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties config_1json__JsonSchema="https://codemagic.io/codemagic-schema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

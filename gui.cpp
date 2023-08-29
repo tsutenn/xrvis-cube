@@ -74,6 +74,7 @@ void gui::SetCameraStatus(bool status) {
     ui.baseposz->setReadOnly(status);
 
     ui.cameraopen->setText(status ? "CLOSE" : "OPEN");
+    ui.cubesload->setEnabled(status);
 
     mydata->camera_id = ui.cameraid->value();
     

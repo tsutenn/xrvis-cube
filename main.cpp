@@ -28,8 +28,6 @@ int main(int argc, char *argv[]) {
         }
     });
 
-    ca* cap;
-    ss* ser;
     CaThread* ct;
     SsThread* st;
 
@@ -40,9 +38,36 @@ int main(int argc, char *argv[]) {
     st = new SsThread(&mydata);
     st->start();
 
+    QObject::connect(ct, &CaThread::ThrowError, [&](QString message) {
+        mydata.Log("\nCamera has closed with an error:");
+        mydata.Log(message);
+        mydata.cube_list.clear();
+
+        mydata.Log("\nTrying to re-open camera...");
+        
+        std::vector<Cube> cube_list;
+        Cube base_cube;
+        mydata.SetBaseCube(cube_list, base_cube);
+
+        ct->open(mydata.camera_id, mydata.cam_matrix, mydata.dist_coeff,
+            mydata.marker_size, mydata.marker_length, mydata.marker_margin,
+            cube_list, base_cube);
+        ct->SetCaThreshold(mydata.threshold);
+    });
+    
+    QObject::connect(st, &SsThread::ThrowError, [&](QString message) {
+        mydata.Log("\Socket server has closed with an error:");
+        mydata.Log(message);
+
+        mydata.Log("\nTrying to re-open server...");
+
+        st->open(mydata.server_port);
+        w.ui.ssip->setText(st->ipv4Address());
+    });
+
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
         if (ct->getCameraFlag()) {
-            cap->SetThreshG(value);
+            ct->SetCaThreshold(value);
             w.SetThreshold(value);
         }
         else {
@@ -52,7 +77,7 @@ int main(int argc, char *argv[]) {
 
     QObject::connect(w.ui.threshold, QOverload<int>::of(&QSpinBox::valueChanged), [&](int value) {
         if (ct->getCameraFlag()) {
-            cap->SetThreshG(value);
+            ct->SetCaThreshold(value);
             w.SetThreshold(value);
         }
         else {
@@ -63,32 +88,33 @@ int main(int argc, char *argv[]) {
     QObject::connect(w.ui.cameraopen, &QPushButton::clicked, [&]() {
         if (mydata.camera_status) {
             w.SetCameraStatus(false);
-            ct->close();
+
+            if(ct->getCameraFlag())
+                ct->close();
             mydata.cube_list.clear();
 
-            mydata.Log("CAMERA CLOSED");
+            mydata.Log("\nCAMERA CLOSED");
         }
+
         else {
             w.SetCameraStatus(true);
 
             std::vector<Cube> cube_list;
             Cube base_cube;
-            
             mydata.SetBaseCube(cube_list, base_cube);
 
-            cap = new ca(mydata.camera_id, mydata.cam_matrix, mydata.dist_coeff);
-            cap->SetCubeInfo(mydata.marker_size, mydata.marker_length, mydata.marker_margin);
-            cap->SetCubeList(cube_list, base_cube);
-            cap->SetThreshG(mydata.threshold);
-
-            mydata.Log("CAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
+            mydata.Log("\nCAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
                 ", marker_size=" + QString::number(mydata.marker_size) +
                 ", marker_length=" + QString::number(mydata.marker_length) +
                 ", marker_margin=" + QString::number(mydata.marker_margin) +
                 ", cube_count=" + QString::number(mydata.cube_count) +
                 ", threshold=" + QString::number(mydata.threshold) +
                 ")");
-            ct->open(cap);
+
+            ct->open(mydata.camera_id, mydata.cam_matrix, mydata.dist_coeff,
+                mydata.marker_size, mydata.marker_length, mydata.marker_margin,
+                cube_list, base_cube);
+            ct->SetCaThreshold(mydata.threshold);
         }
     });
 
@@ -96,15 +122,14 @@ int main(int argc, char *argv[]) {
         if (mydata.server_status) {
             w.SetServerStatus(false);
             st->close();
-            mydata.Log("SERVER CLOSED");
+            mydata.Log("\nSERVER CLOSED");
         }
         else {
             w.SetServerStatus(true);
-            ser = new ss(mydata.server_port);
-            mydata.Log("SERVER OPENED (server_port=" + QString::number(mydata.server_port) + ")");
-            st->open(ser);
-            mydata.Log(st->ipv4Address());
+            st->open(mydata.server_port);
             w.ui.ssip->setText(st->ipv4Address());
+
+            mydata.Log("\nSERVER OPENED (ip=" + st->ipv4Address() + "server_port=" + QString::number(mydata.server_port) + ")");
         }
     });
 
@@ -120,11 +145,13 @@ int main(int argc, char *argv[]) {
 
     ct->requestInterruption();
     st->requestInterruption();
+
+    if (ct->getCameraFlag()) ct->close();
     if (st->getServerFlag()) st->close();
+
     ct->wait();
     st->wait();
 
-    if (ct->getCameraFlag()) delete cap;
     delete ct;
     delete st;
 

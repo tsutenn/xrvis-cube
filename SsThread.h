@@ -22,6 +22,13 @@ public:
         ipv4_address = QString::fromUtf8(this->server->getIPV4());
     }
 
+    void open(int port) {
+        this->server = new ss(port);
+        qDebug() << this->server->start();
+        this->serverFlag = true;
+        ipv4_address = QString::fromUtf8(this->server->getIPV4());
+    }
+
     bool getServerFlag() {
         return serverFlag;
     }
@@ -36,38 +43,50 @@ public:
         return ipv4_address;
     }
 
+signals:
+    void ThrowError(QString);
+
 protected:
     void run() override {
         while (!isInterruptionRequested()) {
             if (serverFlag) {
-                sockaddr_in clientAddress = server->receive();
-                mydata->server_loop = true;
+                try {
+                    sockaddr_in clientAddress = server->receive();
+                    mydata->server_loop = true;
 
-                qDebug() << "received request: ";
+                    qDebug() << "received request: ";
 
-                mydata->write_loop = true;
-                while (mydata->camera_loop);
-                std::vector<Cube> detected_cubes;
-                for (int i = 0; i < mydata->detected_cubes.size(); i++) {
-                    detected_cubes.push_back(mydata->detected_cubes[i]);
+                    mydata->write_loop = true;
+                    while (mydata->camera_loop);
+                    std::vector<Cube> detected_cubes;
+                    for (int i = 0; i < mydata->detected_cubes.size(); i++) {
+                        detected_cubes.push_back(mydata->detected_cubes[i]);
+                    }
+                    mydata->write_loop = false;
+
+                    QString message = "";
+                    for (int i = 0; i < detected_cubes.size(); i++) {
+                        message += QString::number(detected_cubes[i].GetId()) + ",";
+                        message += QString::number(detected_cubes[i].transform.position[0] + mydata->base_position[0]) + ",";
+                        message += QString::number(detected_cubes[i].transform.position[1] + mydata->base_position[1]) + ",";
+                        message += QString::number(detected_cubes[i].transform.position[2] + mydata->base_position[2]) + ",";
+                        message += QString::number(detected_cubes[i].transform.rotation[0]) + ",";
+                        message += QString::number(detected_cubes[i].transform.rotation[1]) + ",";
+                        message += QString::number(detected_cubes[i].transform.rotation[2]) + ",";
+                        message += QString::number(detected_cubes[i].transform.rotation[3]) + "\n";
+                    }
+                    // qDebug() << message << endl;
+                    server->response(clientAddress, message.toUtf8());
+
+                    mydata->server_loop = false;
                 }
-                mydata->write_loop = false;
+                catch (const std::exception& e) {
+                    mydata->server_loop = false;
+                    server->close();
+                    ThrowError(e.what());
 
-                QString message = "";
-                for (int i = 0; i < detected_cubes.size(); i++) {
-                    message += QString::number(detected_cubes[i].GetId()) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[0] + mydata->base_position[0]) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[1] + mydata->base_position[1]) + ",";
-                    message += QString::number(detected_cubes[i].transform.position[2] + mydata->base_position[2]) + ",";
-                    message += QString::number(detected_cubes[i].transform.rotation[0]) + ",";
-                    message += QString::number(detected_cubes[i].transform.rotation[1]) + ",";
-                    message += QString::number(detected_cubes[i].transform.rotation[2]) + ",";
-                    message += QString::number(detected_cubes[i].transform.rotation[3]) + "\n";
+                    QThread::msleep(500);
                 }
-                // qDebug() << message << endl;
-                server->response(clientAddress, message.toUtf8());
-
-                mydata->server_loop = false;
             }
         }
     }
