@@ -6,12 +6,12 @@
     "camera id": 0,
     "camera matrix": "820.661,0,305.673,0,818.281,232.527,0,0,1,",
     "distortion coefficients": "0.211161,-1.63561,-0.00488935,-0.0141894,9.22454,",
-    "filter window size": 4,
+    "filter window size": 3,
     "marker length": 24.89,
     "marker margin": 3.56,
-    "marker min_distance": 3,
+    "marker min_distance": 1,
     "marker size": 5,
     "path": "markers.txt",
     "server port": 1228,
-    "threshold": 143
+    "threshold": 126
 }

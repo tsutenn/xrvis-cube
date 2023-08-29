@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
     });
     
     QObject::connect(st, &SsThread::ThrowError, [&](QString message) {
-        mydata.Log("\Socket server has closed with an error:");
+        mydata.Log("\nSocket server has closed with an error:");
         mydata.Log(message);
 
         mydata.Log("\nTrying to re-open server...");

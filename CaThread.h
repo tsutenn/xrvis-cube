@@ -136,7 +136,7 @@ protected:
                             result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetPositionString()) + "\n";
                             result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetRotationString()) + "\n";
                         }
-                        mydata->Log(result);
+                        qDebug() << result;
                     }
 
                     mydata->camera_loop = false;

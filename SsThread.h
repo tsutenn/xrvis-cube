@@ -54,7 +54,7 @@ protected:
                     sockaddr_in clientAddress = server->receive();
                     mydata->server_loop = true;
 
-                    qDebug() << "received request: ";
+                    // qDebug() << "received request: ";
 
                     mydata->write_loop = true;
                     while (mydata->camera_loop);
