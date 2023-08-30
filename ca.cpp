@@ -46,7 +46,6 @@ ca::~ca() {
 	this->frame.release();
 	this->grayFrame.release();
 	this->binaryFrame.release();
-	this->edgeFrame.release();
 }
 
 cv::Mat* ca::GetFrame() {
@@ -55,11 +54,6 @@ cv::Mat* ca::GetFrame() {
 
 cv::Mat* ca::GetBinaryFrame() {
 	return &(this->binaryFrame);
-}
-
-cv::Mat* ca::GetEdgeFrame()
-{
-	return &(this->edgeFrame);
 }
 
 int ca::GetThreshG() {
@@ -116,7 +110,7 @@ float ca::Perimeter(const std::vector<cv::Point>& a)
 	return sum;
 }
 
-void ca::GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame) {
+void ca::GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame) {
 	cv::Mat _binaryFrame;
 
 	cv::cvtColor(input, gray_frame, cv::COLOR_BGRA2GRAY);
@@ -124,17 +118,16 @@ void ca::GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_fra
 	morphologyEx(_binaryFrame, _binaryFrame, cv::MORPH_OPEN, cv::Mat());
 	morphologyEx(_binaryFrame, binary_frame, cv::MORPH_CLOSE, cv::Mat());
 	// cv::threshold(gray_frame, binary_frame, (double)(threshG), 255, cv::THRESH_BINARY_INV);
-	cv::Canny(binary_frame, edge_frame, 100, 200);
 
 	_binaryFrame.release();
 }
 
-void ca::GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame)
+void ca::GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame)
 {
 	cv::Mat _binaryFrame;
 	capture >> raw_frame;
 
-	GenerateFrames(raw_frame, gray_frame, binary_frame, edge_frame);
+	GenerateFrames(raw_frame, gray_frame, binary_frame);
 }
 
 std::vector<Marker> ca::ExtractMarkersFromFrame(cv::Mat& gray_frame, cv::Mat& binary_frame) {
@@ -363,7 +356,7 @@ void ca::Fun() {
 	outputMarkers.clear();
 
 	capture >> frame;
-	GenerateFrames(frame, grayFrame, binaryFrame, edgeFrame);
+	GenerateFrames(frame, grayFrame, binaryFrame);
 	auto canonicalMarkers = ExtractMarkersFromFrame(grayFrame, binaryFrame);
 
 	GenerateBaseCube(baseCube, canonicalMarkers, 1);

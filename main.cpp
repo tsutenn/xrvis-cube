@@ -31,9 +31,8 @@ int main(int argc, char *argv[]) {
     CaThread* ct;
     SsThread* st;
 
-    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.edge);
+    ct = new CaThread(&mydata, w.ui.rawlabel, w.ui.binlabel, w.ui.tableWidget, w.ui.outputlabel);
     ct->start();
-    ct->setOutput(w.ui.outputlabel);
 
     st = new SsThread(&mydata);
     st->start();
@@ -53,6 +52,14 @@ int main(int argc, char *argv[]) {
             mydata.marker_size, mydata.marker_length, mydata.marker_margin,
             cube_list, base_cube);
         ct->SetCaThreshold(mydata.threshold);
+
+        mydata.Log("\nCAMERA OPENED (camera_id=" + QString::number(mydata.camera_id) +
+            ", marker_size=" + QString::number(mydata.marker_size) +
+            ", marker_length=" + QString::number(mydata.marker_length) +
+            ", marker_margin=" + QString::number(mydata.marker_margin) +
+            ", cube_count=" + QString::number(mydata.cube_count) +
+            ", threshold=" + QString::number(mydata.threshold) +
+            ")");
     });
     
     QObject::connect(st, &SsThread::ThrowError, [&](QString message) {
@@ -61,8 +68,16 @@ int main(int argc, char *argv[]) {
 
         mydata.Log("\nTrying to re-open server...");
 
-        st->open(mydata.server_port);
-        w.ui.ssip->setText(st->ipv4Address());
+        if (st->open(mydata.server_port)) {
+            st->open(mydata.server_port);
+            w.ui.ssip->setText(st->ipv4Address());
+
+            mydata.Log("\nSERVER OPENED (ip=" + st->ipv4Address() + "server_port=" + QString::number(mydata.server_port) + ")");
+        }
+        else {
+            w.SetServerStatus(false);
+            mydata.Log("\nre-open server failed!");
+        }
     });
 
     QObject::connect(w.ui.thresholdslider, &QSlider::valueChanged, [&](int value) {
@@ -126,10 +141,14 @@ int main(int argc, char *argv[]) {
         }
         else {
             w.SetServerStatus(true);
-            st->open(mydata.server_port);
-            w.ui.ssip->setText(st->ipv4Address());
+            if (st->open(mydata.server_port)) {
+                w.ui.ssip->setText(st->ipv4Address());
+                mydata.Log("\nSERVER OPENED (ip=" + st->ipv4Address() + "server_port=" + QString::number(mydata.server_port) + ")");
+            }
 
-            mydata.Log("\nSERVER OPENED (ip=" + st->ipv4Address() + "server_port=" + QString::number(mydata.server_port) + ")");
+            else {
+                w.SetServerStatus(false);
+            }
         }
     });
 

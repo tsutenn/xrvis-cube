@@ -15,7 +15,6 @@ public:
 
 	cv::Mat* GetFrame();
 	cv::Mat* GetBinaryFrame();
-	cv::Mat* GetEdgeFrame();
 	int GetThreshG();
 	bool LoopBlock();
 	int GetMarkerSize();
@@ -30,8 +29,8 @@ public:
 	/*
 	 *	Generate gray_frame, binary_frame and edge_frame from input frame.
 	 */
-	void GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame);
-	void GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame, cv::Mat& edge_frame);
+	void GenerateFrames(cv::Mat& input, cv::Mat& gray_frame, cv::Mat& binary_frame);
+	void GenerateFramesFromCapture(cv::Mat& raw_frame, cv::Mat& gray_frame, cv::Mat& binary_frame);
 
 	/*
 	 *	Extract all possible markers frome input frame.
@@ -58,7 +57,6 @@ protected:
 	cv::Mat frame;
 	cv::Mat grayFrame;
 	cv::Mat binaryFrame;
-	cv::Mat edgeFrame;
 
 	int threshG = 120;
 

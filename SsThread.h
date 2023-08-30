@@ -22,11 +22,20 @@ public:
         ipv4_address = QString::fromUtf8(this->server->getIPV4());
     }
 
-    void open(int port) {
-        this->server = new ss(port);
-        qDebug() << this->server->start();
-        this->serverFlag = true;
-        ipv4_address = QString::fromUtf8(this->server->getIPV4());
+    bool open(int port) {
+        try {
+            this->server = new ss(port);
+            qDebug() << this->server->start();
+            serverFlag = true;
+            ipv4_address = QString::fromUtf8(this->server->getIPV4());
+        }
+        catch (const std::exception& e) {
+            serverFlag = false;
+            mydata->Log("\nOpen socket server with error:");
+            mydata->Log(e.what());
+        }
+
+        return serverFlag;
     }
 
     bool getServerFlag() {

@@ -51,10 +51,10 @@ gui::gui(msg* data, QWidget *parent)
         mydata->dist_coeff = std::vector<double>(5);
     }
 
-    ui.LogPanel->setStyleSheet("background: transparent;");
+    /*ui.LogPanel->setStyleSheet("background: transparent;");
     QPalette palette = ui.LogPanel->palette();
     palette.setColor(QPalette::Base, Qt::transparent);
-    ui.LogPanel->setPalette(palette);
+    ui.LogPanel->setPalette(palette);*/
 }
 
 gui::~gui()

@@ -1,6 +1,7 @@
 #pragma once
 #include <qthread.h>
 #include <qlabel.h>
+#include <qtablewidget.h>
 
 #include "ca.h"
 #include "msg.h"
@@ -11,35 +12,25 @@ class CaThread :
     Q_OBJECT
 
 public:
-    CaThread(msg* data, QLabel* frameLabel, QLabel* binaryLabel, QLabel* edgeLabel, QObject* parent = nullptr) : QThread(parent) {
+    CaThread(msg* data, QLabel* frameLabel, QLabel* binaryLabel, QTableWidget* tableWidget, QLabel* outputLabel, QObject* parent = nullptr) : QThread(parent) {
         this->cap = nullptr;
         this->mydata = data;
         
         this->frameLabel = frameLabel;
         this->binaryLabel = binaryLabel;
-        this->edgeLabel = edgeLabel;
-
-        this->outputLabel = nullptr;
+        this->tableWidget = tableWidget;
+        this->outputLabel = outputLabel;
     }
 
     ~CaThread() {
         raw.release();
         grayFrame.release();
         binaryFrame.release();
-        edgeFrame.release();
     }
 
-    bool open(ca* cap) {
-        try {
-            this->cap = cap;
-            this->cameraFlag = true;
-            return true;
-        }
-        
-        catch (const std::exception& e) {
-            mydata->Log(e.what());
-        }
-        return false;
+    void open(ca* cap) {
+        this->cap = cap;
+        this->cameraFlag = true;
     }
 
     void open(int camera_id, std::vector<double> cam_matrix, std::vector<double> dist_coeff, 
@@ -57,7 +48,7 @@ public:
             return true;
         }
         catch (const std::exception& e) {
-            mydata->Log("Set camera data error:");
+            mydata->Log("\nSet camera data error:");
             mydata->Log(e.what());
         }
         return false;
@@ -71,7 +62,6 @@ public:
         outputLabel->setText("OUTPUT IMAGE");
         frameLabel->setText(" ");
         binaryLabel->setText(" ");
-        edgeLabel->setText(" ");
 
         mydata->detected_cubes.clear();
     }
@@ -82,10 +72,6 @@ public:
 
     void SetMsg(msg * mydata) {
         this->mydata = mydata;
-    }
-
-    void setOutput(QLabel* outputLabel) {
-        this->outputLabel = outputLabel;
     }
 
     void SetCaThreshold(int value) {
@@ -105,21 +91,18 @@ protected:
                     mydata->camera_loop = true;
                     while (mydata->write_loop);
 
-                    cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame, edgeFrame);
+                    cap->GenerateFramesFromCapture(raw, grayFrame, binaryFrame);
                     auto detected_markers = cap->ExtractMarkersFromFrame(grayFrame, binaryFrame);
 
                     auto base_markers = cap->GenerateBaseCube(mydata->base_cube, detected_markers, mydata->marker_min_distance);
                     mydata->detected_cubes = cap->GenerateCubes(mydata->cube_list, mydata->base_cube, detected_markers, mydata->marker_min_distance);
 
                     QImage image(raw.data, raw.cols, raw.rows, raw.step, QImage::Format_RGB888);
-                    image = image.rgbSwapped(); // BGR to RGB
+                    image = image.rgbSwapped();
                     frameLabel->setPixmap(QPixmap::fromImage(image));
 
                     QImage imageBin(binaryFrame.data, binaryFrame.cols, binaryFrame.rows, binaryFrame.step, QImage::Format_Grayscale8);
                     binaryLabel->setPixmap(QPixmap::fromImage(imageBin));
-
-                    QImage imageEdge(edgeFrame.data, edgeFrame.cols, edgeFrame.rows, edgeFrame.step, QImage::Format_Grayscale8);
-                    edgeLabel->setPixmap(QPixmap::fromImage(imageEdge));
 
                     if (base_markers.size() > 0) {
                         QImage imageOut(base_markers[0].image.data, base_markers[0].image.cols, base_markers[0].image.rows, base_markers[0].image.step, QImage::Format_Grayscale8);
@@ -129,15 +112,66 @@ protected:
                         outputLabel->setText("NO BASECUBE");
                     }
 
-                    if (mydata->detected_cubes.size() > 0) {
-                        QString result = "detected cubes: (" + QString::number(mydata->detected_cubes.size()) + ")\n";
+                    for (int row = 0; row < tableWidget->rowCount(); ++row) {
+                        QTableWidgetItem* item = tableWidget->item(row, 0);
+                        bool cubeExists = false;
+
                         for (int i = 0; i < mydata->detected_cubes.size(); i++) {
-                            result += "#" + QString::number(mydata->detected_cubes[i].GetId()) + "\n";
-                            result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetPositionString()) + "\n";
-                            result += QString::fromUtf8(mydata->detected_cubes[i].transform.GetRotationString()) + "\n";
+                            if (item->text().toInt() == mydata->detected_cubes[i].GetId()) {
+                                cubeExists = true;
+                                break;
+                            }
                         }
-                        qDebug() << result;
+                        
+                        if (!cubeExists) {
+                            tableWidget->removeRow(row);
+                        }
                     }
+
+                    for (int i = 0; i < mydata->detected_cubes.size(); i++) {
+                        bool cubeExists = false;
+                        for (int row = 0; row < tableWidget->rowCount(); ++row) {
+                            QTableWidgetItem* item = tableWidget->item(row, 0);
+                            if (item->text().toInt() == mydata->detected_cubes[i].GetId()) {
+                                cubeExists = true;
+
+                                tableWidget->item(row, 1)->setText(QString::number(mydata->detected_cubes[i].transform.position[0]));
+                                tableWidget->item(row, 2)->setText(QString::number(mydata->detected_cubes[i].transform.position[1]));
+                                tableWidget->item(row, 3)->setText(QString::number(mydata->detected_cubes[i].transform.position[2]));
+                                tableWidget->item(row, 4)->setText(QString::number(mydata->detected_cubes[i].transform.rotation[0]));
+                                tableWidget->item(row, 5)->setText(QString::number(mydata->detected_cubes[i].transform.rotation[1]));
+                                tableWidget->item(row, 6)->setText(QString::number(mydata->detected_cubes[i].transform.rotation[2]));
+                                tableWidget->item(row, 7)->setText(QString::number(mydata->detected_cubes[i].transform.rotation[3]));
+
+                                break;
+                            }
+                        }
+
+                        if (!cubeExists) {
+                            int row = tableWidget->rowCount();
+                            tableWidget->insertRow(row);
+
+                            QTableWidgetItem* newItem0 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].GetId()));
+                            QTableWidgetItem* newItem1 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.position[0]));
+                            QTableWidgetItem* newItem2 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.position[1]));
+                            QTableWidgetItem* newItem3 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.position[2]));
+                            QTableWidgetItem* newItem4 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.rotation[0]));
+                            QTableWidgetItem* newItem5 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.rotation[1]));
+                            QTableWidgetItem* newItem6 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.rotation[2]));
+                            QTableWidgetItem* newItem7 = new QTableWidgetItem(QString::number(mydata->detected_cubes[i].transform.rotation[3]));
+
+                            tableWidget->setItem(row, 0, newItem0);
+                            tableWidget->setItem(row, 1, newItem1);
+                            tableWidget->setItem(row, 2, newItem2);
+                            tableWidget->setItem(row, 3, newItem3);
+                            tableWidget->setItem(row, 4, newItem4);
+                            tableWidget->setItem(row, 5, newItem5);
+                            tableWidget->setItem(row, 6, newItem6);
+                            tableWidget->setItem(row, 7, newItem7);
+                        }
+                    }
+
+                    tableWidget->viewport()->update();
 
                     mydata->camera_loop = false;
                     cap->Wait(34);
@@ -161,11 +195,10 @@ protected:
     ca* cap;
     QLabel* frameLabel;
     QLabel* binaryLabel;
-    QLabel* edgeLabel;
+    QTableWidget* tableWidget;
     QLabel* outputLabel;
 
     cv::Mat raw;
     cv::Mat grayFrame;
     cv::Mat binaryFrame;
-    cv::Mat edgeFrame;
 };
